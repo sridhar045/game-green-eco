@@ -10,7 +10,9 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Lessons from "./pages/Lessons";
+import LessonPlayer from "./pages/LessonPlayer";
 import Missions from "./pages/Missions";
+import MissionSubmission from "./pages/MissionSubmission";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -37,9 +39,19 @@ const App = () => (
                 <Lessons />
               </ProtectedRoute>
             } />
+            <Route path="/lesson/:id" element={
+              <ProtectedRoute>
+                <LessonPlayer />
+              </ProtectedRoute>
+            } />
             <Route path="/missions" element={
               <ProtectedRoute>
                 <Missions />
+              </ProtectedRoute>
+            } />
+            <Route path="/mission/:id/submit" element={
+              <ProtectedRoute>
+                <MissionSubmission />
               </ProtectedRoute>
             } />
             <Route path="/profile" element={

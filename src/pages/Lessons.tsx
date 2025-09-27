@@ -15,13 +15,15 @@ export default function Lessons() {
   const handleStartLesson = async (lessonId: string) => {
     if (user) {
       await startLesson(lessonId)
-      console.log(`Starting lesson ${lessonId}`)
+      // Navigate to lesson player
+      navigate(`/lesson/${lessonId}`)
     }
   }
 
   const handleContinueLesson = async (lessonId: string, currentProgress: number) => {
     if (user) {
-      console.log(`Continuing lesson ${lessonId} from ${currentProgress}%`)
+      // Navigate to lesson player
+      navigate(`/lesson/${lessonId}`)
     }
   }
 

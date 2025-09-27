@@ -23,9 +23,9 @@ export default function Profile() {
 
   const stats = [
     { label: "Total Points", value: profile?.points || 0, max: 2000 },
-    { label: "Level Progress", value: 75, max: 100 },
-    { label: "Lessons Completed", value: 12, max: 20 },
-    { label: "Missions Joined", value: 8, max: 15 }
+    { label: "Level Progress", value: ((profile?.level || 1) - 1) * 20 + 75, max: 100 },
+    { label: "Lessons Completed", value: profile?.completed_lessons || 0, max: 20 },
+    { label: "Missions Completed", value: profile?.completed_missions || 0, max: 15 }
   ]
 
   if (!profile) return null

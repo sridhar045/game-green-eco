@@ -6,6 +6,7 @@ import { Target, Users, Clock, MapPin, ArrowLeft, CheckCircle, Award, TreePine }
 import { useNavigate } from "react-router-dom"
 import { useMissions } from "@/hooks/useMissions"
 import { useAuth } from "@/contexts/AuthContext"
+import { toast } from "sonner"
 
 export default function Missions() {
   const navigate = useNavigate()
@@ -15,13 +16,14 @@ export default function Missions() {
   const handleStartMission = async (missionId: string) => {
     if (user) {
       await startMission(missionId)
+      toast.success("Mission started! Good luck!")
     }
   }
 
   const handleSubmitMission = async (missionId: string) => {
     if (user) {
-      await submitMission(missionId, { notes: "Mission completed successfully" })
-      console.log(`Submitting mission ${missionId}`)
+      // Navigate to submission page
+      navigate(`/mission/${missionId}/submit`)
     }
   }
 
