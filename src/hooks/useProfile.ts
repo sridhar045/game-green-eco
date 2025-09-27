@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { supabase } from '@/integrations/supabase/client'
+import type { Tables } from '@/integrations/supabase/types'
 
 interface Profile {
   id: string
@@ -9,6 +11,9 @@ interface Profile {
   avatar_url?: string
   points?: number
   level?: number
+  completed_lessons?: number
+  completed_missions?: number
+  streak_days?: number
 }
 
 export function useProfile() {
@@ -17,18 +22,75 @@ export function useProfile() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (user) {
-      // Mock profile data - in real app this would come from Supabase
-      setProfile({
-        id: user.id,
-        email: user.email || '',
-        role: 'student',
-        full_name: user.user_metadata?.full_name || 'Eco Student',
-        points: 1250,
-        level: 5
-      })
+    async function fetchProfile() {
+      if (!user) {
+        setLoading(false)
+        return
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single()
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error fetching profile:', error)
+          setLoading(false)
+          return
+        }
+
+        if (data) {
+          setProfile({
+            id: data.id,
+            email: user.email || '',
+            role: data.role as 'student' | 'organization',
+            full_name: data.display_name || user.user_metadata?.full_name || 'Eco Student',
+            avatar_url: data.avatar_url,
+            points: data.eco_points,
+            level: data.level,
+            completed_lessons: data.completed_lessons,
+            completed_missions: data.completed_missions,
+            streak_days: data.streak_days
+          })
+        } else {
+          // Create profile if it doesn't exist
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              user_id: user.id,
+              display_name: user.user_metadata?.full_name || user.email,
+              role: 'student'
+            })
+            .select()
+            .single()
+
+          if (createError) {
+            console.error('Error creating profile:', createError)
+          } else if (newProfile) {
+            setProfile({
+              id: newProfile.id,
+              email: user.email || '',
+              role: newProfile.role as 'student' | 'organization',
+              full_name: newProfile.display_name,
+              avatar_url: newProfile.avatar_url,
+              points: newProfile.eco_points,
+              level: newProfile.level,
+              completed_lessons: newProfile.completed_lessons,
+              completed_missions: newProfile.completed_missions,
+              streak_days: newProfile.streak_days
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Error with profile:', error)
+      } finally {
+        setLoading(false)
+      }
     }
-    setLoading(false)
+
+    fetchProfile()
   }, [user])
 
   return { profile, loading }

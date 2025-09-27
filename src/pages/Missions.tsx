@@ -2,73 +2,51 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { EcoButton } from "@/components/ui/eco-button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Target, Users, Clock, MapPin, ArrowLeft, CheckCircle } from "lucide-react"
+import { Target, Users, Clock, MapPin, ArrowLeft, CheckCircle, Award, TreePine } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { useMissions } from "@/hooks/useMissions"
+import { useAuth } from "@/contexts/AuthContext"
 
 export default function Missions() {
   const navigate = useNavigate()
+  const { missions, loading, startMission, submitMission } = useMissions()
+  const { user } = useAuth()
 
-  const missions = [
-    {
-      id: 1,
-      title: "Community Garden Project",
-      description: "Help establish a sustainable garden in your local community center.",
-      location: "Downtown Community Center",
-      participants: 24,
-      maxParticipants: 30,
-      duration: "2 weeks",
-      status: "active",
-      progress: 65,
-      points: 200,
-      difficulty: "Beginner"
-    },
-    {
-      id: 2,
-      title: "Beach Cleanup Initiative",
-      description: "Join fellow eco-warriors to clean up our local beaches and waterways.",
-      location: "Sunset Beach",
-      participants: 45,
-      maxParticipants: 50,
-      duration: "1 day",
-      status: "active",
-      progress: 90,
-      points: 150,
-      difficulty: "Beginner"
-    },
-    {
-      id: 3,
-      title: "Urban Wildlife Survey",
-      description: "Document and track local wildlife populations in urban environments.",
-      location: "Central Park Area",
-      participants: 12,
-      maxParticipants: 20,
-      duration: "3 weeks",
-      status: "active",
-      progress: 30,
-      points: 300,
-      difficulty: "Advanced"
-    },
-    {
-      id: 4,
-      title: "Solar Panel Installation",
-      description: "Assist in installing solar panels at local schools and community buildings.",
-      location: "Greenfield Elementary",
-      participants: 15,
-      maxParticipants: 15,
-      duration: "1 week",
-      status: "completed",
-      progress: 100,
-      points: 250,
-      difficulty: "Intermediate"
+  const handleStartMission = async (missionId: string) => {
+    if (user) {
+      await startMission(missionId)
     }
-  ]
+  }
+
+  const handleSubmitMission = async (missionId: string) => {
+    if (user) {
+      await submitMission(missionId, { notes: "Mission completed successfully" })
+      console.log(`Submitting mission ${missionId}`)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-primary/2 to-accent/5">
+        <div className="container mx-auto px-4 py-8 max-w-6xl">
+          <div className="text-center">Loading missions...</div>
+        </div>
+      </div>
+    )
+  }
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'active':
-        return <Badge variant="secondary" className="bg-accent/10 text-accent border-accent/20">Active</Badge>
-      case 'completed':
+      case 'not_started':
+        return <Badge variant="secondary" className="bg-accent/10 text-accent border-accent/20">Available</Badge>
+      case 'in_progress':
+        return <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-500/20">In Progress</Badge>
+      case 'submitted':
+        return <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">Under Review</Badge>
+      case 'approved':
         return <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Completed</Badge>
+      case 'rejected':
+        return <Badge variant="secondary" className="bg-red-500/10 text-red-600 border-red-500/20">Rejected</Badge>
       default:
         return <Badge variant="outline">Unknown</Badge>
     }
@@ -76,11 +54,11 @@ export default function Missions() {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'Beginner':
+      case 'beginner':
         return 'text-primary'
-      case 'Intermediate':
+      case 'intermediate':
         return 'text-accent'
-      case 'Advanced':
+      case 'advanced':
         return 'text-eco-sun'
       default:
         return 'text-muted-foreground'
@@ -112,79 +90,95 @@ export default function Missions() {
 
         {/* Missions Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {missions.map((mission) => (
-            <Card key={mission.id} className="hover-shadow transition-all duration-300 hover:scale-105">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CardTitle className="text-xl">{mission.title}</CardTitle>
-                      {mission.status === 'completed' && (
-                        <CheckCircle className="h-5 w-5 text-primary" />
-                      )}
-                    </div>
-                    <CardDescription className="text-sm mb-3">
-                      {mission.description}
-                    </CardDescription>
-                  </div>
-                  {getStatusBadge(mission.status)}
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
-                    {mission.location}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Users className="h-4 w-4" />
-                        {mission.participants}/{mission.maxParticipants}
+          {missions.map((mission) => {
+            const status = mission.submission?.status || "not_started"
+            
+            return (
+              <Card key={mission.id} className="hover-shadow transition-all duration-300 hover:scale-105">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CardTitle className="text-xl">{mission.title}</CardTitle>
+                        {status === 'approved' && (
+                          <CheckCircle className="h-5 w-5 text-primary" />
+                        )}
                       </div>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        {mission.duration}
-                      </div>
+                      <CardDescription className="text-sm mb-3">
+                        {mission.description}
+                      </CardDescription>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className={`text-xs ${getDifficultyColor(mission.difficulty)}`}>
-                        {mission.difficulty}
-                      </Badge>
-                      <Badge variant="secondary" className="text-xs">
-                        {mission.points} pts
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              </CardHeader>
-              
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="text-muted-foreground">Progress</span>
-                      <span className="font-medium">{mission.progress}%</span>
-                    </div>
-                    <Progress value={mission.progress} className="h-2" />
+                    {getStatusBadge(status)}
                   </div>
                   
-                  <EcoButton
-                    variant={mission.status === 'completed' ? "outline" : "eco"}
-                    className="w-full flex items-center justify-center gap-2"
-                    disabled={mission.participants >= mission.maxParticipants && mission.status !== 'completed'}
-                  >
-                    <Target className="h-4 w-4" />
-                    {mission.status === 'completed' 
-                      ? "View Results" 
-                      : mission.participants >= mission.maxParticipants 
-                        ? "Mission Full" 
-                        : "Join Mission"
-                    }
-                  </EcoButton>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <Clock className="h-4 w-4" />
+                          {mission.estimated_time}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className={`text-xs ${getDifficultyColor(mission.difficulty)}`}>
+                          {mission.difficulty}
+                        </Badge>
+                        <Badge variant="secondary" className="text-xs">
+                          {mission.points} pts
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="text-sm text-muted-foreground">
+                      <p className="line-clamp-3">{mission.instructions}</p>
+                    </div>
+                    
+                    <EcoButton
+                      variant={status === 'approved' ? "outline" : "eco"}
+                      className="w-full flex items-center justify-center gap-2"
+                      disabled={status === 'approved' || status === 'submitted'}
+                      onClick={() => {
+                        if (status === "not_started") {
+                          handleStartMission(mission.id)
+                        } else if (status === "in_progress") {
+                          handleSubmitMission(mission.id)
+                        }
+                      }}
+                    >
+                      {status === "not_started" && (
+                        <>
+                          <TreePine className="h-4 w-4" />
+                          Start Mission
+                        </>
+                      )}
+                      {status === "in_progress" && (
+                        <>
+                          <Target className="h-4 w-4" />
+                          Submit Work
+                        </>
+                      )}
+                      {status === "submitted" && (
+                        <>
+                          <Clock className="h-4 w-4" />
+                          Under Review
+                        </>
+                      )}
+                      {status === "approved" && (
+                        <>
+                          <Award className="h-4 w-4" />
+                          Completed
+                        </>
+                      )}
+                    </EcoButton>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
       </div>
     </div>
