@@ -6,7 +6,7 @@ interface AuthContextType {
   user: User | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<void>
-  signUp: (email: string, password: string) => Promise<void>
+  signUp: (email: string, password: string, options?: any) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -50,10 +50,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (error) throw error
   }
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, options?: any) => {
+    const redirectUrl = `${window.location.origin}/`
+    
     const { error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: redirectUrl,
+        ...options
+      }
     })
     if (error) throw error
   }

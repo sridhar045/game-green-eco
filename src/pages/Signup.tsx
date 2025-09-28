@@ -1,4 +1,4 @@
-import { SignupForm } from "@/components/auth/signup-form"
+import { MultiStepSignup } from "@/components/auth/multi-step-signup"
 import { Leaf, TreePine } from "lucide-react"
 
 export default function Signup() {
@@ -35,7 +35,7 @@ export default function Signup() {
           </p>
         </div>
 
-        <SignupForm />
+        <MultiStepSignup />
       </div>
     </div>
   )

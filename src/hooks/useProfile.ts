@@ -7,9 +7,9 @@ interface Profile {
   id: string
   email: string
   role: 'student' | 'organization'
-  full_name?: string
+  display_name?: string
   avatar_url?: string
-  points?: number
+  eco_points?: number
   level?: number
   completed_lessons?: number
   completed_missions?: number
@@ -46,9 +46,9 @@ export function useProfile() {
             id: data.id,
             email: user.email || '',
             role: data.role as 'student' | 'organization',
-            full_name: data.display_name || user.user_metadata?.full_name || 'Eco Student',
+            display_name: data.display_name || user.user_metadata?.full_name || 'Eco Student',
             avatar_url: data.avatar_url,
-            points: data.eco_points,
+            eco_points: data.eco_points,
             level: data.level,
             completed_lessons: data.completed_lessons,
             completed_missions: data.completed_missions,
@@ -73,9 +73,9 @@ export function useProfile() {
               id: newProfile.id,
               email: user.email || '',
               role: newProfile.role as 'student' | 'organization',
-              full_name: newProfile.display_name,
+              display_name: newProfile.display_name,
               avatar_url: newProfile.avatar_url,
-              points: newProfile.eco_points,
+              eco_points: newProfile.eco_points,
               level: newProfile.level,
               completed_lessons: newProfile.completed_lessons,
               completed_missions: newProfile.completed_missions,

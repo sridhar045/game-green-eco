@@ -7,11 +7,20 @@ import { useNavigate } from "react-router-dom"
 import { useMissions } from "@/hooks/useMissions"
 import { useAuth } from "@/contexts/AuthContext"
 import { toast } from "sonner"
+import { MissionDetailsModal } from "@/components/mission/mission-details-modal"
+import { useState } from "react"
 
 export default function Missions() {
   const navigate = useNavigate()
   const { missions, loading, startMission, submitMission } = useMissions()
   const { user } = useAuth()
+  const [selectedMission, setSelectedMission] = useState<any>(null)
+  const [modalOpen, setModalOpen] = useState(false)
+
+  const handleMissionClick = (mission: any) => {
+    setSelectedMission(mission)
+    setModalOpen(true)
+  }
 
   const handleStartMission = async (missionId: string) => {
     if (user) {
@@ -140,41 +149,10 @@ export default function Missions() {
                     </div>
                     
                     <EcoButton
-                      variant={status === 'approved' ? "outline" : "eco"}
-                      className="w-full flex items-center justify-center gap-2"
-                      disabled={status === 'approved' || status === 'submitted'}
-                      onClick={() => {
-                        if (status === "not_started") {
-                          handleStartMission(mission.id)
-                        } else if (status === "in_progress") {
-                          handleSubmitMission(mission.id)
-                        }
-                      }}
+                      onClick={() => handleMissionClick(mission)}
+                      className="w-full"
                     >
-                      {status === "not_started" && (
-                        <>
-                          <TreePine className="h-4 w-4" />
-                          Start Mission
-                        </>
-                      )}
-                      {status === "in_progress" && (
-                        <>
-                          <Target className="h-4 w-4" />
-                          Submit Work
-                        </>
-                      )}
-                      {status === "submitted" && (
-                        <>
-                          <Clock className="h-4 w-4" />
-                          Under Review
-                        </>
-                      )}
-                      {status === "approved" && (
-                        <>
-                          <Award className="h-4 w-4" />
-                          Completed
-                        </>
-                      )}
+                      View Details
                     </EcoButton>
                   </div>
                 </CardContent>
@@ -183,6 +161,12 @@ export default function Missions() {
           })}
         </div>
       </div>
+      
+      <MissionDetailsModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        mission={selectedMission}
+      />
     </div>
   )
 }

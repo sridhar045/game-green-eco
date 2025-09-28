@@ -30,6 +30,11 @@ export function VideoPlayer({ videoUrl, onVideoComplete, onProgressUpdate, durat
       const progress = (video.currentTime / video.duration) * 100
       setVideoProgress(progress)
       onProgressUpdate(progress)
+      
+      // Save video progress to localStorage for resume functionality
+      if (videoUrl) {
+        localStorage.setItem(`video_progress_${videoUrl}`, video.currentTime.toString())
+      }
     }
 
     const handleEnded = () => {
@@ -41,7 +46,15 @@ export function VideoPlayer({ videoUrl, onVideoComplete, onProgressUpdate, durat
     video.addEventListener('timeupdate', updateTime)
     video.addEventListener('ended', handleEnded)
     video.addEventListener('loadedmetadata', () => {
-      setCurrentTime(0)
+      // Resume from saved progress if available
+      if (videoUrl) {
+        const savedProgress = localStorage.getItem(`video_progress_${videoUrl}`)
+        if (savedProgress) {
+          const savedTime = parseFloat(savedProgress)
+          video.currentTime = savedTime
+          setCurrentTime(savedTime)
+        }
+      }
     })
 
     return () => {
