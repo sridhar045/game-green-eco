@@ -302,6 +302,7 @@ export type Database = {
           id: string
           last_activity_date: string | null
           level: number
+          organization_code: string | null
           organization_name: string | null
           region_country: string | null
           region_district: string | null
@@ -323,6 +324,7 @@ export type Database = {
           id?: string
           last_activity_date?: string | null
           level?: number
+          organization_code?: string | null
           organization_name?: string | null
           region_country?: string | null
           region_district?: string | null
@@ -344,6 +346,7 @@ export type Database = {
           id?: string
           last_activity_date?: string | null
           level?: number
+          organization_code?: string | null
           organization_name?: string | null
           region_country?: string | null
           region_district?: string | null
@@ -405,7 +408,10 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      generate_organization_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
