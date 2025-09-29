@@ -22,7 +22,7 @@ export default function Profile() {
   ]
 
   const stats = [
-    { label: "Total Points", value: profile?.points || 0, max: 2000 },
+    { label: "Total Points", value: profile?.eco_points || 0, max: 2000 },
     { label: "Level Progress", value: ((profile?.level || 1) - 1) * 20 + 75, max: 100 },
     { label: "Lessons Completed", value: profile?.completed_lessons || 0, max: 20 },
     { label: "Missions Completed", value: profile?.completed_missions || 0, max: 15 }
@@ -56,13 +56,13 @@ export default function Profile() {
               <Avatar className="h-24 w-24">
                 <AvatarImage src={profile.avatar_url} />
                 <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
-                  {profile.full_name?.charAt(0) || profile.email.charAt(0).toUpperCase()}
+                  {profile.display_name?.charAt(0) || profile.email.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               
               <div className="flex-1">
                 <h1 className="text-3xl font-bold text-foreground mb-2">
-                  {profile.full_name || 'Eco Warrior'}
+                  {profile.display_name || 'Eco Warrior'}
                 </h1>
                 <p className="text-muted-foreground mb-4">{profile.email}</p>
                 
@@ -73,7 +73,7 @@ export default function Profile() {
                   </Badge>
                   <Badge variant="outline" className="flex items-center gap-1 text-lg px-3 py-1">
                     <Leaf className="h-4 w-4 text-primary" />
-                    {profile.points} Points
+                    {profile.eco_points} Points
                   </Badge>
                 </div>
               </div>
