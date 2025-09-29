@@ -139,7 +139,7 @@ export function DetailsModal({ isOpen, onClose, type, data }: DetailsModalProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" aria-describedby="details-modal-description">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {getIcon()}
