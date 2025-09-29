@@ -1,8 +1,25 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Building2, Users, BookOpen, Target } from "lucide-react"
+import { EcoButton } from "@/components/ui/eco-button"
+import { Building2, Users, BookOpen, Target, FileText } from "lucide-react"
+import { useOrganizationDashboard } from "@/hooks/useOrganizationDashboard"
+import { MissionReviewModal } from "@/components/mission/mission-review-modal"
+import { useState } from "react"
+import { formatDistanceToNow } from "date-fns"
 
 export function OrganizationDashboard() {
+  const { stats, loading } = useOrganizationDashboard()
+  const [reviewModalOpen, setReviewModalOpen] = useState(false)
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-primary/2 to-accent/5">
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <div className="text-center py-8">Loading dashboard...</div>
+        </div>
+      </div>
+    )
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/2 to-accent/5">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -11,6 +28,15 @@ export function OrganizationDashboard() {
           <p className="text-lg text-muted-foreground">
             Manage your environmental education programs
           </p>
+          <div className="mt-4">
+            <EcoButton 
+              onClick={() => setReviewModalOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              Review Submissions
+            </EcoButton>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -22,9 +48,9 @@ export function OrganizationDashboard() {
               <Users className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1,247</div>
+              <div className="text-2xl font-bold">{stats.totalStudents}</div>
               <p className="text-xs text-muted-foreground">
-                +12% from last month
+                Active in your organization
               </p>
             </CardContent>
           </Card>
@@ -37,9 +63,9 @@ export function OrganizationDashboard() {
               <BookOpen className="h-4 w-4 text-accent" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">18</div>
+              <div className="text-2xl font-bold">{stats.activePrograms}</div>
               <p className="text-xs text-muted-foreground">
-                3 new this month
+                Available missions
               </p>
             </CardContent>
           </Card>
@@ -52,9 +78,9 @@ export function OrganizationDashboard() {
               <Target className="h-4 w-4 text-eco-sun" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">342</div>
+              <div className="text-2xl font-bold">{stats.completedMissions}</div>
               <p className="text-xs text-muted-foreground">
-                +28% completion rate
+                Total by your students
               </p>
             </CardContent>
           </Card>
@@ -67,7 +93,7 @@ export function OrganizationDashboard() {
               <Building2 className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">8.7</div>
+              <div className="text-2xl font-bold">{stats.impactScore}</div>
               <p className="text-xs text-muted-foreground">
                 Out of 10.0
               </p>
@@ -84,31 +110,32 @@ export function OrganizationDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                <div>
-                  <p className="font-medium">New student enrollment</p>
-                  <p className="text-sm text-muted-foreground">25 students joined the Climate Action program</p>
+              {stats.recentActivities.length > 0 ? (
+                stats.recentActivities.map((activity) => (
+                  <div key={activity.id} className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+                    <div>
+                      <p className="font-medium">{activity.type === 'completion' ? 'Mission completed' : 'New submission'}</p>
+                      <p className="text-sm text-muted-foreground">{activity.message}</p>
+                    </div>
+                    <Badge variant="secondary">
+                      {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
+                    </Badge>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-muted-foreground">No recent activities</p>
                 </div>
-                <Badge variant="secondary">2 hours ago</Badge>
-              </div>
-              <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                <div>
-                  <p className="font-medium">Mission completed</p>
-                  <p className="text-sm text-muted-foreground">Urban Garden project reached 100% completion</p>
-                </div>
-                <Badge variant="secondary">1 day ago</Badge>
-              </div>
-              <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                <div>
-                  <p className="font-medium">New achievement unlocked</p>
-                  <p className="text-sm text-muted-foreground">Students earned "Water Conservation Champion" badge</p>
-                </div>
-                <Badge variant="secondary">3 days ago</Badge>
-              </div>
+              )}
             </div>
           </CardContent>
         </Card>
       </div>
+
+      <MissionReviewModal
+        isOpen={reviewModalOpen}
+        onClose={() => setReviewModalOpen(false)}
+      />
     </div>
   )
 }
