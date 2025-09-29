@@ -9,6 +9,7 @@ import { ArrowLeft, ArrowRight, User, Building2, MapPin } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
+import { OrganizationCodeDisplay } from "./organization-code-display"
 
 interface SignupData {
   email: string
@@ -17,6 +18,7 @@ interface SignupData {
   displayName: string
   role: string
   organizationName?: string
+  organizationCode?: string
   regionDistrict: string
   regionState: string
   regionCountry: string
@@ -32,6 +34,7 @@ export function MultiStepSignup() {
     displayName: "",
     role: "",
     organizationName: "",
+    organizationCode: "",
     regionDistrict: "",
     regionState: "",
     regionCountry: "India",
@@ -51,7 +54,8 @@ export function MultiStepSignup() {
                signupData.password === signupData.confirmPassword
       case 2:
         return signupData.displayName && signupData.role && 
-               (signupData.role !== 'organization' || signupData.organizationName)
+               (signupData.role !== 'organization' || signupData.organizationName) &&
+               (signupData.role !== 'student' || signupData.organizationCode)
       case 3:
         return signupData.regionDistrict && signupData.regionState && signupData.regionCountry
       default:
@@ -84,13 +88,18 @@ export function MultiStepSignup() {
           display_name: signupData.displayName,
           role: signupData.role,
           organization_name: signupData.organizationName,
+          organization_code: signupData.organizationCode,
           region_district: signupData.regionDistrict,
           region_state: signupData.regionState,
           region_country: signupData.regionCountry,
           gender: signupData.gender
         }
       })
+      
       toast.success("Account created successfully!")
+      
+      // For organizations, we'll need to fetch the generated code from the profile
+      // This will be handled by the dashboard after redirect
       navigate("/dashboard")
     } catch (error: any) {
       toast.error(error.message || "Failed to create account")
@@ -196,6 +205,22 @@ export function MultiStepSignup() {
                 </div>
               )}
               
+              {signupData.role === 'student' && (
+                <div>
+                  <Label htmlFor="organizationCode">Organization Code *</Label>
+                  <Input
+                    id="organizationCode"
+                    value={signupData.organizationCode}
+                    onChange={(e) => setSignupData(prev => ({ ...prev, organizationCode: e.target.value }))}
+                    placeholder="Enter 4-digit organization code"
+                    maxLength={4}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Enter the 4-digit code provided by your organization
+                  </p>
+                </div>
+              )}
+              
               <div>
                 <Label htmlFor="gender">Gender (Optional)</Label>
                 <Select 
@@ -272,6 +297,10 @@ export function MultiStepSignup() {
       default:
         return null
     }
+  }
+
+  const handleOrgCodeContinue = () => {
+    navigate("/dashboard")
   }
 
   return (

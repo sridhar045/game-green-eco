@@ -15,6 +15,7 @@ interface Profile {
   completed_missions?: number
   streak_days?: number
   organization_name?: string
+  organization_code?: string
   region_district?: string
   region_state?: string
   region_country?: string
@@ -59,6 +60,7 @@ export function useProfile() {
             completed_missions: data.completed_missions,
             streak_days: data.streak_days,
             organization_name: data.organization_name,
+            organization_code: data.organization_code,
             region_district: data.region_district,
             region_state: data.region_state,
             region_country: data.region_country,
@@ -91,6 +93,7 @@ export function useProfile() {
               completed_missions: newProfile.completed_missions,
               streak_days: newProfile.streak_days,
               organization_name: newProfile.organization_name,
+              organization_code: newProfile.organization_code,
               region_district: newProfile.region_district,
               region_state: newProfile.region_state,
               region_country: newProfile.region_country,

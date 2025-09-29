@@ -46,7 +46,7 @@ export function useMissionReview() {
           const userIds = submissionsData.map(sub => sub.user_id)
           const { data: profilesData } = await supabase
             .from('profiles')
-            .select('user_id, display_name, organization_name, region_district, region_state')
+            .select('user_id, display_name, organization_code')
             .in('user_id', userIds)
 
           // Filter submissions from students in the same organization and add profile data
@@ -64,9 +64,8 @@ export function useMissionReview() {
             })
             .filter((submission: any) => {
               const studentProfile = profilesData?.find(p => p.user_id === submission.user_id)
-              return studentProfile?.organization_name === profile.organization_name &&
-                     studentProfile?.region_district === profile.region_district &&
-                     studentProfile?.region_state === profile.region_state
+              return studentProfile?.organization_code === profile.organization_code &&
+                     profile.organization_code // Only show if organization has a code
             })
 
           setSubmissions(filteredSubmissions)

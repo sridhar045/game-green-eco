@@ -66,7 +66,7 @@ export default function Profile() {
                 </h1>
                 <p className="text-muted-foreground mb-4">{profile.email}</p>
                 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-wrap">
                   <Badge variant="secondary" className="flex items-center gap-1 text-lg px-3 py-1">
                     <Star className="h-4 w-4" />
                     Level {profile.level}
@@ -75,6 +75,12 @@ export default function Profile() {
                     <Leaf className="h-4 w-4 text-primary" />
                     {profile.eco_points} Points
                   </Badge>
+                  {profile.role === 'organization' && profile.organization_code && (
+                    <Badge variant="outline" className="flex items-center gap-1 text-lg px-3 py-1 bg-primary/5 border-primary/20 text-primary">
+                      <Settings className="h-4 w-4" />
+                      Code: {profile.organization_code}
+                    </Badge>
+                  )}
                 </div>
               </div>
             </div>
