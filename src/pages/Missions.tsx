@@ -2,12 +2,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { EcoButton } from "@/components/ui/eco-button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Target, Users, Clock, MapPin, ArrowLeft, CheckCircle, Award, TreePine } from "lucide-react"
+import { Target, Users, Clock, MapPin, ArrowLeft, CheckCircle, Award, TreePine, Trophy } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useMissions } from "@/hooks/useMissions"
 import { useAuth } from "@/contexts/AuthContext"
 import { toast } from "sonner"
 import { MissionDetailsModal } from "@/components/mission/mission-details-modal"
+import { LeaderboardModal } from "@/components/mission/leaderboard-modal"
 import { useState } from "react"
 
 export default function Missions() {
@@ -16,6 +17,7 @@ export default function Missions() {
   const { user } = useAuth()
   const [selectedMission, setSelectedMission] = useState<any>(null)
   const [modalOpen, setModalOpen] = useState(false)
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false)
 
   const handleMissionClick = (mission: any) => {
     setSelectedMission(mission)
@@ -80,7 +82,7 @@ export default function Missions() {
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/2 to-accent/5">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center justify-between mb-8">
           <EcoButton
             variant="ghost"
             onClick={() => navigate("/dashboard")}
@@ -88,6 +90,15 @@ export default function Missions() {
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Dashboard
+          </EcoButton>
+          
+          <EcoButton
+            variant="outline"
+            onClick={() => setLeaderboardOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <Trophy className="h-4 w-4" />
+            Leaderboard
           </EcoButton>
         </div>
 
@@ -166,6 +177,11 @@ export default function Missions() {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         mission={selectedMission}
+      />
+      
+      <LeaderboardModal
+        isOpen={leaderboardOpen}
+        onClose={() => setLeaderboardOpen(false)}
       />
     </div>
   )

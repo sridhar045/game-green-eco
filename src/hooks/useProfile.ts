@@ -14,6 +14,11 @@ interface Profile {
   completed_lessons?: number
   completed_missions?: number
   streak_days?: number
+  organization_name?: string
+  region_district?: string
+  region_state?: string
+  region_country?: string
+  gender?: string
 }
 
 export function useProfile() {
@@ -52,7 +57,12 @@ export function useProfile() {
             level: data.level,
             completed_lessons: data.completed_lessons,
             completed_missions: data.completed_missions,
-            streak_days: data.streak_days
+            streak_days: data.streak_days,
+            organization_name: data.organization_name,
+            region_district: data.region_district,
+            region_state: data.region_state,
+            region_country: data.region_country,
+            gender: data.gender
           })
         } else {
           // Create profile if it doesn't exist
@@ -79,7 +89,12 @@ export function useProfile() {
               level: newProfile.level,
               completed_lessons: newProfile.completed_lessons,
               completed_missions: newProfile.completed_missions,
-              streak_days: newProfile.streak_days
+              streak_days: newProfile.streak_days,
+              organization_name: newProfile.organization_name,
+              region_district: newProfile.region_district,
+              region_state: newProfile.region_state,
+              region_country: newProfile.region_country,
+              gender: newProfile.gender
             })
           }
         }
