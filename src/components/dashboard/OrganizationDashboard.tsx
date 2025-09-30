@@ -1,15 +1,30 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { EcoButton } from "@/components/ui/eco-button"
-import { Building2, Users, BookOpen, Target, FileText } from "lucide-react"
+import { Building2, Users, BookOpen, Target, FileText, User, LogOut } from "lucide-react"
 import { useOrganizationDashboard } from "@/hooks/useOrganizationDashboard"
 import { MissionReviewModal } from "@/components/mission/mission-review-modal"
 import { useState } from "react"
 import { formatDistanceToNow } from "date-fns"
+import { useNavigate } from "react-router-dom"
+import { useAuth } from "@/contexts/AuthContext"
+import { toast } from "sonner"
 
 export function OrganizationDashboard() {
   const { stats, loading } = useOrganizationDashboard()
   const [reviewModalOpen, setReviewModalOpen] = useState(false)
+  const navigate = useNavigate()
+  const { signOut } = useAuth()
+
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      toast.success("Signed out successfully")
+      navigate("/login")
+    } catch (error) {
+      toast.error("Failed to sign out")
+    }
+  }
 
   if (loading) {
     return (
@@ -23,6 +38,26 @@ export function OrganizationDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/2 to-accent/5">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Header with Profile and Logout */}
+        <div className="flex justify-end gap-2 mb-6">
+          <EcoButton
+            variant="outline"
+            onClick={() => navigate("/profile")}
+            className="flex items-center gap-2"
+          >
+            <User className="h-4 w-4" />
+            Profile
+          </EcoButton>
+          <EcoButton
+            variant="outline"
+            onClick={handleSignOut}
+            className="flex items-center gap-2"
+          >
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </EcoButton>
+        </div>
+
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4">Organization Dashboard</h1>
           <p className="text-lg text-muted-foreground">

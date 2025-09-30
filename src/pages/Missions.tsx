@@ -162,8 +162,9 @@ export default function Missions() {
                     <EcoButton
                       onClick={() => handleMissionClick(mission)}
                       className="w-full"
+                      disabled={status === 'submitted'}
                     >
-                      View Details
+                      {status === 'submitted' ? 'Under Review' : 'View Details'}
                     </EcoButton>
                   </div>
                 </CardContent>
