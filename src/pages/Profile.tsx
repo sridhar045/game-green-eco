@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
-import { Award, Star, Trophy, Leaf, TreePine, ArrowLeft, Settings } from "lucide-react"
+import { Award, Star, Trophy, Leaf, TreePine, ArrowLeft, Settings, Building2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
 export default function Profile() {
@@ -75,6 +75,12 @@ export default function Profile() {
                     <Leaf className="h-4 w-4 text-primary" />
                     {profile.eco_points} Points
                   </Badge>
+                  {profile.role === 'student' && profile.organization_code && (
+                    <Badge variant="outline" className="flex items-center gap-1 text-lg px-3 py-1 bg-accent/10 border-accent/20 text-accent">
+                      <Building2 className="h-4 w-4" />
+                      Organization: {profile.organization_code}
+                    </Badge>
+                  )}
                   {profile.role === 'organization' && profile.organization_code && (
                     <Badge variant="outline" className="flex items-center gap-1 text-lg px-3 py-1 bg-primary/5 border-primary/20 text-primary">
                       <Settings className="h-4 w-4" />

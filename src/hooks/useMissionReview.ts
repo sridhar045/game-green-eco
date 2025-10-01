@@ -78,6 +78,26 @@ export function useMissionReview() {
     }
 
     fetchPendingSubmissions()
+
+    // Set up real-time subscription for new submissions
+    const channel = supabase
+      .channel('mission-submissions-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'mission_submissions'
+        },
+        () => {
+          fetchPendingSubmissions()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [user, profile])
 
   const approveSubmission = async (submissionId: string, pointsAwarded: number) => {

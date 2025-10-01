@@ -4,6 +4,7 @@ import { EcoButton } from "@/components/ui/eco-button"
 import { Building2, Users, BookOpen, Target, FileText, User, LogOut } from "lucide-react"
 import { useOrganizationDashboard } from "@/hooks/useOrganizationDashboard"
 import { MissionReviewModal } from "@/components/mission/mission-review-modal"
+import { StudentsListModal } from "@/components/dashboard/StudentsListModal"
 import { useState } from "react"
 import { formatDistanceToNow } from "date-fns"
 import { useNavigate } from "react-router-dom"
@@ -13,6 +14,7 @@ import { toast } from "sonner"
 export function OrganizationDashboard() {
   const { stats, loading } = useOrganizationDashboard()
   const [reviewModalOpen, setReviewModalOpen] = useState(false)
+  const [studentsModalOpen, setStudentsModalOpen] = useState(false)
   const navigate = useNavigate()
   const { signOut } = useAuth()
 
@@ -75,7 +77,10 @@ export function OrganizationDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="hover-shadow">
+          <Card 
+            className="hover-shadow cursor-pointer transition-all hover:scale-105"
+            onClick={() => setStudentsModalOpen(true)}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Total Students
@@ -85,7 +90,7 @@ export function OrganizationDashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{stats.totalStudents}</div>
               <p className="text-xs text-muted-foreground">
-                Active in your organization
+                Click to view all students
               </p>
             </CardContent>
           </Card>
@@ -170,6 +175,11 @@ export function OrganizationDashboard() {
       <MissionReviewModal
         isOpen={reviewModalOpen}
         onClose={() => setReviewModalOpen(false)}
+      />
+      
+      <StudentsListModal
+        isOpen={studentsModalOpen}
+        onClose={() => setStudentsModalOpen(false)}
       />
     </div>
   )

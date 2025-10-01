@@ -53,6 +53,29 @@ export function useMissions() {
     }
 
     fetchMissions()
+
+    // Set up real-time subscription for mission submissions
+    if (user) {
+      const channel = supabase
+        .channel('mission-updates')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'mission_submissions',
+            filter: `user_id=eq.${user.id}`
+          },
+          () => {
+            fetchMissions()
+          }
+        )
+        .subscribe()
+
+      return () => {
+        supabase.removeChannel(channel)
+      }
+    }
   }, [user])
 
   const startMission = async (missionId: string) => {

@@ -30,17 +30,15 @@ export function useOrganizationDashboard() {
 
   useEffect(() => {
     async function fetchOrganizationStats() {
-      if (!user || profile?.role !== 'organization' || !profile?.organization_name) return
+      if (!user || profile?.role !== 'organization' || !profile?.organization_code) return
 
       try {
-        // Get total students in organization
+        // Get total students in organization using organization_code
         const { data: studentsData } = await supabase
           .from('profiles')
           .select('user_id, completed_missions, completed_lessons, eco_points')
           .eq('role', 'student')
-          .eq('organization_name', profile.organization_name)
-          .eq('region_district', profile.region_district)
-          .eq('region_state', profile.region_state)
+          .eq('organization_code', profile.organization_code)
 
         // Get active missions
         const { data: missionsData } = await supabase
@@ -94,6 +92,38 @@ export function useOrganizationDashboard() {
     }
 
     fetchOrganizationStats()
+
+    // Set up real-time subscription for profile updates
+    const channel = supabase
+      .channel('organization-dashboard-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles',
+          filter: `organization_code=eq.${profile?.organization_code}`
+        },
+        () => {
+          fetchOrganizationStats()
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'mission_submissions'
+        },
+        () => {
+          fetchOrganizationStats()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [user, profile])
 
   return { stats, loading }
