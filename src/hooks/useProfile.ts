@@ -20,6 +20,7 @@ interface Profile {
   region_state?: string
   region_country?: string
   gender?: string
+  fetched_organization_name?: string
 }
 
 export function useProfile() {
@@ -48,6 +49,18 @@ export function useProfile() {
         }
 
         if (data) {
+          // If student, fetch their organization name
+          let fetchedOrgName = data.organization_name
+          if (data.role === 'student' && data.organization_code && !data.organization_name) {
+            const { data: orgData } = await supabase
+              .from('profiles')
+              .select('organization_name')
+              .eq('organization_code', data.organization_code)
+              .eq('role', 'organization')
+              .maybeSingle()
+            fetchedOrgName = orgData?.organization_name || data.organization_code
+          }
+
           setProfile({
             id: data.id,
             email: user.email || '',
@@ -64,7 +77,8 @@ export function useProfile() {
             region_district: data.region_district,
             region_state: data.region_state,
             region_country: data.region_country,
-            gender: data.gender
+            gender: data.gender,
+            fetched_organization_name: fetchedOrgName
           })
         } else {
           // Create profile if it doesn't exist

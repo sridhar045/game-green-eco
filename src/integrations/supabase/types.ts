@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_log: {
+        Row: {
+          activity_message: string
+          activity_type: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          organization_code: string
+          user_id: string
+        }
+        Insert: {
+          activity_message: string
+          activity_type: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          organization_code: string
+          user_id: string
+        }
+        Update: {
+          activity_message?: string
+          activity_type?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          organization_code?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       badges: {
         Row: {
           category: string

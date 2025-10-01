@@ -8,6 +8,8 @@ interface OrganizationStats {
   activePrograms: number
   completedMissions: number
   impactScore: number
+  approvedMissions: number
+  rejectedMissions: number
   recentActivities: Array<{
     id: string
     type: string
@@ -24,6 +26,8 @@ export function useOrganizationDashboard() {
     activePrograms: 0,
     completedMissions: 0,
     impactScore: 0,
+    approvedMissions: 0,
+    rejectedMissions: 0,
     recentActivities: []
   })
   const [loading, setLoading] = useState(true)
@@ -49,13 +53,8 @@ export function useOrganizationDashboard() {
         // Get recent mission submissions
         const { data: submissionsData } = await supabase
           .from('mission_submissions')
-          .select(`
-            *,
-            mission:missions(title),
-            student_profile:profiles!mission_submissions_user_id_fkey(display_name)
-          `)
+          .select('id, user_id, status')
           .order('created_at', { ascending: false })
-          .limit(10)
 
         // Filter submissions from students in the same organization
         const orgSubmissions = submissionsData?.filter((submission: any) => {
@@ -67,23 +66,34 @@ export function useOrganizationDashboard() {
         const totalEcoPoints = studentsData?.reduce((sum, student) => sum + student.eco_points, 0) || 0
         const impactScore = totalStudents > 0 ? Math.min(10, (totalEcoPoints / (totalStudents * 100)) * 10) : 0
 
-        // Create recent activities from submissions
-        const recentActivities = orgSubmissions?.slice(0, 5).map((submission: any, index) => ({
-          id: submission.id,
-          type: submission.status === 'approved' ? 'completion' : 'submission',
-          message: submission.status === 'approved' 
-            ? `${submission.student_profile?.display_name} completed ${submission.mission?.title}`
-            : `${submission.student_profile?.display_name} submitted ${submission.mission?.title}`,
-          timestamp: submission.status === 'approved' ? submission.reviewed_at : submission.submitted_at
+        // Count approved and rejected missions
+        const approvedCount = orgSubmissions?.filter((s: any) => s.status === 'approved').length || 0
+        const rejectedCount = orgSubmissions?.filter((s: any) => s.status === 'rejected').length || 0
+
+        // Get recent activities from activity_log
+        const { data: activitiesData } = await supabase
+          .from('activity_log')
+          .select('*')
+          .eq('organization_code', profile.organization_code)
+          .order('created_at', { ascending: false })
+          .limit(10)
+
+        const recentActivities = activitiesData?.map((activity) => ({
+          id: activity.id,
+          type: activity.activity_type,
+          message: activity.activity_message,
+          timestamp: activity.created_at
         })) || []
 
-        setStats({
-          totalStudents,
-          activePrograms: missionsData?.length || 0,
-          completedMissions: totalMissions,
-          impactScore: Math.round(impactScore * 10) / 10,
-          recentActivities
-        })
+      setStats({
+        totalStudents,
+        activePrograms: missionsData?.length || 0,
+        completedMissions: totalMissions,
+        impactScore: Math.round(impactScore * 10) / 10,
+        approvedMissions: approvedCount,
+        rejectedMissions: rejectedCount,
+        recentActivities
+      })
       } catch (error) {
         console.error('Error fetching organization stats:', error)
       } finally {
@@ -114,6 +124,18 @@ export function useOrganizationDashboard() {
           event: '*',
           schema: 'public',
           table: 'mission_submissions'
+        },
+        () => {
+          fetchOrganizationStats()
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'activity_log',
+          filter: `organization_code=eq.${profile?.organization_code}`
         },
         () => {
           fetchOrganizationStats()

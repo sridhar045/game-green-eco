@@ -39,6 +39,20 @@ export function DashboardStats() {
     return data || []
   }
 
+  const [badgeCount, setBadgeCount] = useState(0)
+
+  useEffect(() => {
+    async function fetchBadgeCount() {
+      if (!user) return
+      const { count } = await supabase
+        .from('user_badges')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+      setBadgeCount(count || 0)
+    }
+    fetchBadgeCount()
+  }, [user])
+
   const fetchBadgesDetails = async () => {
     if (!user) return []
     const { data } = await supabase
@@ -121,7 +135,7 @@ export function DashboardStats() {
             <Award className="h-4 w-4 text-eco-sun" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{0}</div>
+            <div className="text-2xl font-bold">{badgeCount}</div>
             <p className="text-xs text-muted-foreground">
               Click to view details
             </p>

@@ -83,32 +83,48 @@ export function DetailsModal({ isOpen, onClose, type, data }: DetailsModalProps)
       case 'missions':
         return (
           <div className="space-y-4">
-            {data.map((mission, index) => (
-              <Card key={mission.id || index}>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-medium mb-1">{mission.title}</h3>
-                      <p className="text-sm text-muted-foreground mb-2">{mission.description}</p>
-                      <div className="flex items-center gap-4 text-sm">
-                        <Badge variant="outline">{mission.difficulty}</Badge>
-                        <div className="flex items-center gap-1">
-                          <Target className="h-4 w-4" />
-                          <span>{mission.points} points</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          <span>{new Date(mission.submitted_at).toLocaleDateString()}</span>
+            {data.map((mission, index) => {
+              const missionData = mission.missions || {}
+              return (
+                <Card key={mission.id || index}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-medium mb-1">{missionData.title || 'Mission'}</h3>
+                        <p className="text-sm text-muted-foreground mb-2">{missionData.description}</p>
+                        <div className="flex flex-wrap items-center gap-4 text-sm">
+                          <Badge variant="outline" className="capitalize">{missionData.difficulty}</Badge>
+                          <div className="flex items-center gap-1 text-primary font-semibold">
+                            <Target className="h-4 w-4" />
+                            <span>{mission.points_awarded || missionData.points || 0} eco-points</span>
+                          </div>
+                          {mission.submitted_at && (
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              <span>Completed: {new Date(mission.submitted_at).toLocaleDateString()}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <Badge 
+                          variant="default" 
+                          className={
+                            mission.status === 'approved' 
+                              ? 'bg-primary/10 text-primary border-primary/20' 
+                              : mission.status === 'rejected'
+                              ? 'bg-red-500/10 text-red-600 border-red-500/20'
+                              : 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20'
+                          }
+                        >
+                          {mission.status === 'approved' ? 'Approved' : mission.status === 'rejected' ? 'Rejected' : 'Under Review'}
+                        </Badge>
+                      </div>
                     </div>
-                    <Badge variant="default" className="bg-green-500">
-                      {mission.status === 'approved' ? 'Approved' : 'Completed'}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         )
 

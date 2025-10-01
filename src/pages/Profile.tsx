@@ -12,23 +12,42 @@ export default function Profile() {
   const { profile } = useProfile()
   const navigate = useNavigate()
 
+  if (!profile) return null
+
+  const isOrganization = profile.role === 'organization'
+  const pointsPerLevel = isOrganization ? 2000 : 200
+  
+  // Calculate real level progress
+  const currentLevel = profile.level || 1
+  const currentPoints = profile.eco_points || 0
+  const pointsForCurrentLevel = (currentLevel - 1) * pointsPerLevel
+  const pointsForNextLevel = currentLevel * pointsPerLevel
+  const pointsInCurrentLevel = currentPoints - pointsForCurrentLevel
+  const pointsNeededForNextLevel = pointsForNextLevel - pointsForCurrentLevel
+  const levelProgress = Math.min(100, Math.round((pointsInCurrentLevel / pointsNeededForNextLevel) * 100))
+
   const achievements = [
-    { id: 1, name: "Climate Champion", description: "Completed 10 climate lessons", icon: Award, earned: true },
-    { id: 2, name: "Mission Leader", description: "Led 3 community missions", icon: Star, earned: true },
-    { id: 3, name: "Eco Warrior", description: "Earned 1000 points", icon: Trophy, earned: true },
+    { id: 1, name: "Climate Champion", description: "Completed 10 climate lessons", icon: Award, earned: (profile.completed_lessons || 0) >= 10 },
+    { id: 2, name: "Mission Leader", description: "Led 3 community missions", icon: Star, earned: (profile.completed_missions || 0) >= 3 },
+    { id: 3, name: "Eco Warrior", description: "Earned 1000 points", icon: Trophy, earned: (profile.eco_points || 0) >= 1000 },
     { id: 4, name: "Tree Hugger", description: "Planted 10 trees", icon: TreePine, earned: false },
-    { id: 5, name: "Green Guardian", description: "Complete 20 missions", icon: Leaf, earned: false },
+    { id: 5, name: "Green Guardian", description: "Complete 20 missions", icon: Leaf, earned: (profile.completed_missions || 0) >= 20 },
     { id: 6, name: "Sustainability Expert", description: "Master all lesson categories", icon: Award, earned: false }
   ]
 
-  const stats = [
-    { label: "Total Points", value: profile?.eco_points || 0, max: 2000 },
-    { label: "Level Progress", value: ((profile?.level || 1) - 1) * 20 + 75, max: 100 },
+  const studentStats = [
+    { label: "Total Points", value: profile?.eco_points || 0, max: pointsPerLevel },
+    { label: "Level Progress", value: levelProgress, max: 100 },
     { label: "Lessons Completed", value: profile?.completed_lessons || 0, max: 20 },
     { label: "Missions Completed", value: profile?.completed_missions || 0, max: 15 }
   ]
 
-  if (!profile) return null
+  const organizationStats = [
+    { label: "Total Eco Points", value: profile?.eco_points || 0, max: pointsPerLevel * 2 },
+    { label: "Level Progress", value: levelProgress, max: 100 }
+  ]
+
+  const stats = isOrganization ? organizationStats : studentStats
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/2 to-accent/5">
@@ -78,7 +97,7 @@ export default function Profile() {
                   {profile.role === 'student' && profile.organization_code && (
                     <Badge variant="outline" className="flex items-center gap-1 text-lg px-3 py-1 bg-accent/10 border-accent/20 text-accent">
                       <Building2 className="h-4 w-4" />
-                      Organization: {profile.organization_code}
+                      {profile.fetched_organization_name || profile.organization_code}
                     </Badge>
                   )}
                   {profile.role === 'organization' && profile.organization_code && (
@@ -114,57 +133,59 @@ export default function Profile() {
           ))}
         </div>
 
-        {/* Achievements */}
-        <Card className="eco-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-eco-sun" />
-              Achievements
-            </CardTitle>
-            <CardDescription>
-              Your environmental impact milestones and badges
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {achievements.map((achievement, index) => (
-                <div 
-                  key={achievement.id}
-                  className={`p-4 rounded-lg border transition-all duration-300 ${
-                    achievement.earned 
-                      ? 'bg-primary/5 border-primary/20 hover:bg-primary/10' 
-                      : 'bg-muted/20 border-muted opacity-60'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className={`p-2 rounded-full ${
-                      achievement.earned ? 'bg-primary/10' : 'bg-muted/30'
-                    }`}>
-                      <achievement.icon className={`h-5 w-5 ${
-                        achievement.earned ? 'text-primary' : 'text-muted-foreground'
-                      }`} />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className={`font-semibold ${
-                        achievement.earned ? 'text-foreground' : 'text-muted-foreground'
+        {/* Achievements - Only for students */}
+        {!isOrganization && (
+          <Card className="eco-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-eco-sun" />
+                Achievements
+              </CardTitle>
+              <CardDescription>
+                Your environmental impact milestones and badges
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {achievements.map((achievement, index) => (
+                  <div 
+                    key={achievement.id}
+                    className={`p-4 rounded-lg border transition-all duration-300 ${
+                      achievement.earned 
+                        ? 'bg-primary/5 border-primary/20 hover:bg-primary/10' 
+                        : 'bg-muted/20 border-muted opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className={`p-2 rounded-full ${
+                        achievement.earned ? 'bg-primary/10' : 'bg-muted/30'
                       }`}>
-                        {achievement.name}
-                      </h3>
+                        <achievement.icon className={`h-5 w-5 ${
+                          achievement.earned ? 'text-primary' : 'text-muted-foreground'
+                        }`} />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className={`font-semibold ${
+                          achievement.earned ? 'text-foreground' : 'text-muted-foreground'
+                        }`}>
+                          {achievement.name}
+                        </h3>
+                      </div>
+                      {achievement.earned && (
+                        <Badge variant="secondary" className="bg-primary/10 text-primary text-xs">
+                          Earned
+                        </Badge>
+                      )}
                     </div>
-                    {achievement.earned && (
-                      <Badge variant="secondary" className="bg-primary/10 text-primary text-xs">
-                        Earned
-                      </Badge>
-                    )}
+                    <p className="text-sm text-muted-foreground">
+                      {achievement.description}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {achievement.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   )
