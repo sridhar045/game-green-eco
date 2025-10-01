@@ -10,11 +10,13 @@ import { formatDistanceToNow } from "date-fns"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
 import { toast } from "sonner"
+import { ActiveProgramsListModal } from "./ActiveProgramsListModal"
 
 export function OrganizationDashboard() {
   const { stats, loading } = useOrganizationDashboard()
   const [reviewModalOpen, setReviewModalOpen] = useState(false)
   const [studentsModalOpen, setStudentsModalOpen] = useState(false)
+  const [activeProgramsModalOpen, setActiveProgramsModalOpen] = useState(false)
   const navigate = useNavigate()
   const { signOut } = useAuth()
 
@@ -51,7 +53,7 @@ export function OrganizationDashboard() {
             Profile
           </EcoButton>
           <EcoButton
-            variant="outline"
+            variant="destructive"
             onClick={handleSignOut}
             className="flex items-center gap-2"
           >
@@ -66,7 +68,7 @@ export function OrganizationDashboard() {
             Manage your environmental education programs
           </p>
           <div className="mt-4">
-            <EcoButton 
+            <EcoButton
               onClick={() => setReviewModalOpen(true)}
               className="flex items-center gap-2"
             >
@@ -77,7 +79,7 @@ export function OrganizationDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card 
+          <Card
             className="hover-shadow cursor-pointer transition-all hover:scale-105"
             onClick={() => setStudentsModalOpen(true)}
           >
@@ -95,7 +97,10 @@ export function OrganizationDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="hover-shadow">
+          <Card
+            className="hover-shadow cursor-pointer transition-all hover:scale-105"
+            onClick={() => setActiveProgramsModalOpen(true)}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Active Programs
@@ -105,7 +110,7 @@ export function OrganizationDashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{stats.activePrograms}</div>
               <p className="text-xs text-muted-foreground">
-                Available missions
+                Click to see all Available missions
               </p>
             </CardContent>
           </Card>
@@ -176,11 +181,16 @@ export function OrganizationDashboard() {
         isOpen={reviewModalOpen}
         onClose={() => setReviewModalOpen(false)}
       />
-      
+
+      <ActiveProgramsListModal
+        isOpen={activeProgramsModalOpen}
+        onClose={() => setActiveProgramsModalOpen(false)}
+      />
       <StudentsListModal
         isOpen={studentsModalOpen}
         onClose={() => setStudentsModalOpen(false)}
       />
+      
     </div>
   )
 }

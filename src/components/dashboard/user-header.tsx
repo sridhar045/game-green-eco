@@ -17,7 +17,7 @@ export function UserHeader() {
     try {
       await signOut()
       toast.success("Signed out successfully")
-      navigate("/")
+      navigate("/login")
     } catch (error) {
       toast.error("Failed to sign out")
     }

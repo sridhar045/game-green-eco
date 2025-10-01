@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EcoButton } from "@/components/ui/eco-button"
@@ -50,12 +51,12 @@ export function MultiStepSignup() {
   const validateStep = (step: number) => {
     switch (step) {
       case 1:
-        return signupData.email && signupData.password && signupData.confirmPassword && 
-               signupData.password === signupData.confirmPassword
+        return signupData.email && signupData.password && signupData.confirmPassword &&
+          signupData.password === signupData.confirmPassword
       case 2:
-        return signupData.displayName && signupData.role && 
-               (signupData.role !== 'organization' || signupData.organizationName) &&
-               (signupData.role !== 'student' || signupData.organizationCode)
+        return signupData.displayName && signupData.role &&
+          (signupData.role !== 'organization' || signupData.organizationName) &&
+          (signupData.role !== 'student' || signupData.organizationCode)
       case 3:
         return signupData.regionDistrict && signupData.regionState && signupData.regionCountry
       default:
@@ -95,9 +96,9 @@ export function MultiStepSignup() {
           gender: signupData.gender
         }
       })
-      
+
       toast.success("Account created successfully!")
-      
+
       // For organizations, we'll need to fetch the generated code from the profile
       // This will be handled by the dashboard after redirect
       navigate("/dashboard")
@@ -118,7 +119,7 @@ export function MultiStepSignup() {
               <h2 className="text-xl font-semibold">Account Information</h2>
               <p className="text-muted-foreground">Create your account credentials</p>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <Label htmlFor="email">Email Address *</Label>
@@ -130,7 +131,7 @@ export function MultiStepSignup() {
                   placeholder="Enter your email"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="password">Password *</Label>
                 <Input
@@ -141,7 +142,7 @@ export function MultiStepSignup() {
                   placeholder="Create a password"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="confirmPassword">Confirm Password *</Label>
                 <Input
@@ -164,7 +165,7 @@ export function MultiStepSignup() {
               <h2 className="text-xl font-semibold">Profile Information</h2>
               <p className="text-muted-foreground">Tell us about yourself</p>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <Label htmlFor="displayName">Full Name *</Label>
@@ -175,11 +176,11 @@ export function MultiStepSignup() {
                   placeholder="Enter your full name"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="role">Role *</Label>
-                <Select 
-                  value={signupData.role} 
+                <Select
+                  value={signupData.role}
                   onValueChange={(value) => setSignupData(prev => ({ ...prev, role: value }))}
                 >
                   <SelectTrigger>
@@ -187,12 +188,11 @@ export function MultiStepSignup() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="teacher">Teacher</SelectItem>
                     <SelectItem value="organization">Organization</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              
+
               {signupData.role === 'organization' && (
                 <div>
                   <Label htmlFor="organizationName">Organization Name *</Label>
@@ -204,40 +204,44 @@ export function MultiStepSignup() {
                   />
                 </div>
               )}
-              
+
               {signupData.role === 'student' && (
-                <div>
-                  <Label htmlFor="organizationCode">Organization Code *</Label>
-                  <Input
-                    id="organizationCode"
-                    value={signupData.organizationCode}
-                    onChange={(e) => setSignupData(prev => ({ ...prev, organizationCode: e.target.value }))}
-                    placeholder="Enter 4-digit organization code"
-                    maxLength={4}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Enter the 4-digit code provided by your organization
-                  </p>
+                <div className="flex flex-col gap-2">
+                  <div>
+                    <Label htmlFor="organizationCode">Organization Code *</Label>
+                    <Input
+                      id="organizationCode"
+                      value={signupData.organizationCode}
+                      onChange={(e) => setSignupData(prev => ({ ...prev, organizationCode: e.target.value }))}
+                      placeholder="Enter 4-digit organization code"
+                      maxLength={4}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Enter the 4-digit code provided by your organization
+                    </p>
+                  </div>
+                  <div>
+                    <Label htmlFor="gender">Gender</Label>
+                    <Select
+                      value={signupData.gender}
+                      onValueChange={(value) => setSignupData(prev => ({ ...prev, gender: value }))}
+                      required
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               )}
-              
-              <div>
-                <Label htmlFor="gender">Gender (Optional)</Label>
-                <Select 
-                  value={signupData.gender} 
-                  onValueChange={(value) => setSignupData(prev => ({ ...prev, gender: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select gender" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                    <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+
+
             </div>
           </div>
         )
@@ -250,12 +254,12 @@ export function MultiStepSignup() {
               <h2 className="text-xl font-semibold">Location Information</h2>
               <p className="text-muted-foreground">Help us understand your region</p>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <Label htmlFor="regionCountry">Country *</Label>
-                <Select 
-                  value={signupData.regionCountry} 
+                <Select
+                  value={signupData.regionCountry}
                   onValueChange={(value) => setSignupData(prev => ({ ...prev, regionCountry: value }))}
                 >
                   <SelectTrigger>
@@ -270,7 +274,7 @@ export function MultiStepSignup() {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div>
                 <Label htmlFor="regionState">State/Province *</Label>
                 <Input
@@ -280,7 +284,7 @@ export function MultiStepSignup() {
                   placeholder="Enter your state or province"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="regionDistrict">District/City *</Label>
                 <Input
@@ -314,14 +318,14 @@ export function MultiStepSignup() {
           </p>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-6">
         {renderStepContent()}
-        
+
         <div className="flex justify-between">
           {currentStep > 1 && (
-            <EcoButton 
-              variant="outline" 
+            <EcoButton
+              variant="outline"
               onClick={handleBack}
               className="flex items-center gap-2"
             >
@@ -329,10 +333,10 @@ export function MultiStepSignup() {
               Back
             </EcoButton>
           )}
-          
+
           <div className="ml-auto">
             {currentStep < totalSteps ? (
-              <EcoButton 
+              <EcoButton
                 onClick={handleNext}
                 disabled={!validateStep(currentStep)}
                 className="flex items-center gap-2"
@@ -341,7 +345,7 @@ export function MultiStepSignup() {
                 <ArrowRight className="h-4 w-4" />
               </EcoButton>
             ) : (
-              <EcoButton 
+              <EcoButton
                 onClick={handleSubmit}
                 disabled={!validateStep(currentStep) || loading}
                 className="flex items-center gap-2"
@@ -351,7 +355,7 @@ export function MultiStepSignup() {
             )}
           </div>
         </div>
-        
+
         <div className="text-center">
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}

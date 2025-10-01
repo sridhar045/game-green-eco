@@ -125,6 +125,9 @@ export function StudentsListModal({ isOpen, onClose }: StudentsListModalProps) {
                         <Badge variant="secondary" className="text-xs">
                           Level {student.level}
                         </Badge>
+                        <Badge variant="outline" className="text-xs bg-primary/5 border-primary/20">
+                          🔥 {student.streak_days} day streak
+                        </Badge>
                         <span className="text-sm text-muted-foreground flex items-center gap-1">
                           <Award className="h-3 w-3" />
                           {student.eco_points} pts
@@ -137,11 +140,6 @@ export function StudentsListModal({ isOpen, onClose }: StudentsListModalProps) {
                           <Target className="h-3 w-3" />
                           {student.completed_missions} missions
                         </span>
-                        {student.streak_days > 0 && (
-                          <Badge variant="outline" className="text-xs bg-primary/5 border-primary/20">
-                            🔥 {student.streak_days} day streak
-                          </Badge>
-                        )}
                       </div>
                     </div>
                   </div>
