@@ -3,6 +3,7 @@ import { DashboardStats } from "@/components/dashboard/dashboard-stats"
 import { NavigationCards } from "@/components/dashboard/navigation-cards"
 import { OrganizationDashboard } from "@/components/dashboard/OrganizationDashboard"
 import { OrganizationCodeWelcome } from "@/components/dashboard/OrganizationCodeWelcome"
+import { InProgressSection } from "@/components/dashboard/InProgressSection"
 import { useProfile } from "@/hooks/useProfile"
 import { useState, useEffect } from "react"
 
@@ -47,6 +48,9 @@ export default function Dashboard() {
 
         {/* Dashboard Stats */}
         <DashboardStats />
+
+        {/* In Progress Section */}
+        <InProgressSection />
 
         {/* Navigation Cards */}
         <NavigationCards />

@@ -29,8 +29,9 @@ export default function LessonPlayer() {
   const [videoProgress, setVideoProgress] = useState(0)
   const [quizScore, setQuizScore] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [hasMissions, setHasMissions] = useState(false)
 
-  // Mock quiz questions - in real app, fetch from Supabase
+  // Mock quiz questions with sample video - in real app, fetch from Supabase
   const quizQuestions = [
     {
       id: '1',
@@ -65,11 +66,27 @@ export default function LessonPlayer() {
     }
   ]
 
+  // Sample video URL - in real app, this would come from lesson.content.video_url
+  const sampleVideoUrl = lesson?.content?.video_url || "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+
   useEffect(() => {
     if (id && user) {
       fetchLesson()
+      checkForMissions()
     }
   }, [id, user])
+
+  const checkForMissions = async () => {
+    if (!id) return
+    const { data, error } = await supabase
+      .from('missions')
+      .select('id')
+      .eq('lesson_id', id)
+      .eq('is_active', true)
+      .limit(1)
+    
+    setHasMissions(!error && data && data.length > 0)
+  }
 
   const fetchLesson = async () => {
     try {
@@ -157,15 +174,26 @@ export default function LessonPlayer() {
 
   const handleQuizComplete = (score: number) => {
     setQuizScore(score)
-    const quizProgressWeight = 33 + (score >= 70 ? 34 : 20) // Higher progress for passing score
-    setProgress(quizProgressWeight)
-    updateProgress(quizProgressWeight)
-    setCurrentStage(LessonStage.MISSIONS)
     
-    if (score >= 70) {
-      toast.success(`Great job! You scored ${score}%. Now check out the missions!`)
+    if (!hasMissions) {
+      // No missions, complete lesson at 100%
+      const finalProgress = 100
+      setProgress(finalProgress)
+      updateProgress(finalProgress, true)
+      setCurrentStage(LessonStage.COMPLETED)
+      toast.success(`Great job! You scored ${score}%. Lesson completed!`)
     } else {
-      toast.info(`You scored ${score}%. You can still proceed to missions!`)
+      // Has missions, move to missions stage
+      const quizProgressWeight = 67
+      setProgress(quizProgressWeight)
+      updateProgress(quizProgressWeight)
+      setCurrentStage(LessonStage.MISSIONS)
+      
+      if (score >= 70) {
+        toast.success(`Great job! You scored ${score}%. Now check out the missions!`)
+      } else {
+        toast.info(`You scored ${score}%. You can still proceed to missions!`)
+      }
     }
   }
 
@@ -195,7 +223,7 @@ export default function LessonPlayer() {
       case LessonStage.VIDEO:
         return (
           <VideoPlayer
-            videoUrl={lesson?.content?.video_url}
+            videoUrl={sampleVideoUrl}
             onVideoComplete={handleVideoComplete}
             onProgressUpdate={handleVideoProgress}
             duration={lesson?.duration_minutes || 10}
@@ -210,10 +238,31 @@ export default function LessonPlayer() {
         )
       case LessonStage.MISSIONS:
         return (
-          <LessonMissions
-            lessonId={id!}
-            onMissionStart={handleMissionStart}
-          />
+          <div className="space-y-4">
+            <LessonMissions
+              lessonId={id!}
+              onMissionStart={handleMissionStart}
+            />
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    Want to complete this lesson without missions?
+                  </p>
+                  <EcoButton
+                    variant="outline"
+                    onClick={() => {
+                      updateProgress(100, true)
+                      toast.success("Lesson marked as complete!")
+                      setTimeout(() => navigate('/lessons'), 1000)
+                    }}
+                  >
+                    Complete Lesson
+                  </EcoButton>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )
       case LessonStage.COMPLETED:
         return (

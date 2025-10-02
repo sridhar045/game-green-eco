@@ -212,8 +212,10 @@ export type Database = {
       }
       mission_submissions: {
         Row: {
+          completion_count: number | null
           created_at: string
           id: string
+          iteration: number | null
           mission_id: string
           points_awarded: number | null
           reviewed_at: string | null
@@ -226,8 +228,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          completion_count?: number | null
           created_at?: string
           id?: string
+          iteration?: number | null
           mission_id: string
           points_awarded?: number | null
           reviewed_at?: string | null
@@ -240,8 +244,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          completion_count?: number | null
           created_at?: string
           id?: string
+          iteration?: number | null
           mission_id?: string
           points_awarded?: number | null
           reviewed_at?: string | null

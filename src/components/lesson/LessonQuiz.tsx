@@ -46,9 +46,10 @@ export function LessonQuiz({ questions, onQuizComplete }: LessonQuizProps) {
         setSelectedAnswer(null)
         setShowResult(false)
       } else {
-        // Quiz completed
+        // Quiz completed - calculate score safely
         const score = newAnswers.reduce((acc, answer, index) => {
-          return answer === questions[index].correctAnswer ? acc + 1 : acc
+          const question = questions[index]
+          return question && answer === question.correctAnswer ? acc + 1 : acc
         }, 0)
         
         const percentage = Math.round((score / questions.length) * 100)
@@ -67,7 +68,8 @@ export function LessonQuiz({ questions, onQuizComplete }: LessonQuizProps) {
 
   if (quizCompleted) {
     const score = answers.reduce((acc, answer, index) => {
-      return answer === questions[index].correctAnswer ? acc + 1 : acc
+      const question = questions[index]
+      return question && answer === question.correctAnswer ? acc + 1 : acc
     }, 0)
     const percentage = Math.round((score / questions.length) * 100)
 

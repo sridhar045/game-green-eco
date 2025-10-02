@@ -85,7 +85,7 @@ export default function MissionSubmission() {
         completedDate: new Date().toISOString()
       }
 
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from('mission_submissions')
         .upsert({
           user_id: user.id,
@@ -95,11 +95,15 @@ export default function MissionSubmission() {
           submission_files: formData.files,
           submitted_at: new Date().toISOString()
         })
+        .select()
+        .single()
 
       if (error) {
         console.error('Error submitting mission:', error)
         toast.error("Failed to submit mission")
       } else {
+        // Update local state immediately
+        setSubmission(data)
         toast.success("Mission submitted successfully!")
         setTimeout(() => {
           navigate('/missions')

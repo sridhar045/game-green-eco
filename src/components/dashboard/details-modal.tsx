@@ -111,7 +111,7 @@ export function DetailsModal({ isOpen, onClose, type, data }: DetailsModalProps)
                           variant="default" 
                           className={
                             mission.status === 'approved' 
-                              ? 'bg-primary/10 text-primary border-primary/20' 
+                              ? 'bg-green-500/20 text-green-700 border-green-500/30' 
                               : mission.status === 'rejected'
                               ? 'bg-red-500/10 text-red-600 border-red-500/20'
                               : 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20'

@@ -147,8 +147,15 @@ export function LessonMissions({ lessonId, onMissionStart }: LessonMissionsProps
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
             <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No missions available for this lesson yet.</p>
-            <p className="text-sm">Check back later for new challenges!</p>
+            <p className="mb-4">No missions available for this lesson yet.</p>
+            <p className="text-sm mb-6">Check back later for new challenges!</p>
+            <EcoButton 
+              variant="eco"
+              onClick={() => navigate('/dashboard')}
+              className="mx-auto"
+            >
+              Back to Dashboard
+            </EcoButton>
           </div>
         </CardContent>
       </Card>

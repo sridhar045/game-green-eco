@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { EcoButton } from "@/components/ui/eco-button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Target, Users, Clock, MapPin, ArrowLeft, CheckCircle, Award, TreePine, Trophy } from "lucide-react"
+import { Target, Users, Clock, MapPin, ArrowLeft, CheckCircle, Award, TreePine, Trophy, ArrowRight } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useMissions } from "@/hooks/useMissions"
 import { useAuth } from "@/contexts/AuthContext"
@@ -159,13 +159,32 @@ export default function Missions() {
                       <p className="line-clamp-3">{mission.instructions}</p>
                     </div>
                     
-                    <EcoButton
-                      onClick={() => handleMissionClick(mission)}
-                      className="w-full"
-                      disabled={status === 'submitted' || status === 'approved'}
-                    >
-                      {status === 'approved' ? 'Completed' : status === 'submitted' ? 'Under Review' : 'View Details'}
-                    </EcoButton>
+                    {status === 'approved' ? (
+                      <EcoButton
+                        className="w-full opacity-60"
+                        disabled
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Completed
+                      </EcoButton>
+                    ) : status === 'submitted' ? (
+                      <EcoButton
+                        className="w-full"
+                        disabled
+                        variant="outline"
+                      >
+                        <Clock className="h-4 w-4 mr-2" />
+                        Under Review
+                      </EcoButton>
+                    ) : (
+                      <EcoButton
+                        onClick={() => handleMissionClick(mission)}
+                        className="w-full"
+                      >
+                        View Details
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </EcoButton>
+                    )}
                   </div>
                 </CardContent>
               </Card>

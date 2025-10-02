@@ -110,14 +110,58 @@ export function MissionReviewModal({ isOpen, onClose }: MissionReviewModalProps)
                   </CardHeader>
                   
                   <CardContent className="space-y-4">
+                    <div>
+                      <p className="font-medium mb-2">Mission Description:</p>
+                      <p className="text-sm text-muted-foreground">{submission.mission?.description}</p>
+                    </div>
+
                     {submission.submission_data && (
-                      <div>
-                        <p className="font-medium mb-2">Submission Details:</p>
-                        <div className="bg-muted/50 p-3 rounded-md">
-                          <pre className="text-sm whitespace-pre-wrap">
-                            {JSON.stringify(submission.submission_data, null, 2)}
-                          </pre>
-                        </div>
+                      <div className="space-y-3">
+                        <p className="font-medium">Submission Details:</p>
+                        {typeof submission.submission_data === 'object' && (
+                          <div className="space-y-2">
+                            {Object.entries(submission.submission_data as Record<string, any>).map(([key, value]) => (
+                              <div key={key} className="bg-muted/50 p-3 rounded-md">
+                                <p className="text-sm font-medium capitalize mb-1">{key.replace(/_/g, ' ')}:</p>
+                                {key.includes('video') || key.includes('url') || key.includes('link') ? (
+                                  <div>
+                                    {typeof value === 'string' && (value.includes('youtube.com') || value.includes('youtu.be')) ? (
+                                      <div className="space-y-2">
+                                        <a 
+                                          href={value as string} 
+                                          target="_blank" 
+                                          rel="noopener noreferrer"
+                                          className="text-primary hover:underline text-sm flex items-center gap-1"
+                                        >
+                                          Watch Video →
+                                        </a>
+                                        <div className="aspect-video rounded-md overflow-hidden">
+                                          <iframe
+                                            src={`https://www.youtube.com/embed/${(value as string).includes('youtu.be') ? (value as string).split('youtu.be/')[1].split('?')[0] : new URLSearchParams(new URL(value as string).search).get('v')}`}
+                                            className="w-full h-full"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                          />
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <a 
+                                        href={value as string} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="text-primary hover:underline text-sm"
+                                      >
+                                        {value as string}
+                                      </a>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <p className="text-sm">{String(value)}</p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                     
