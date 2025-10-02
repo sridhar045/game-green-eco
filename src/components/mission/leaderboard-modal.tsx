@@ -20,6 +20,7 @@ export function LeaderboardModal({ isOpen, onClose }: LeaderboardModalProps) {
   // Use student leaderboard for students, organization leaderboard for organizations
   const isStudentView = profile?.role === 'student'
   const { leaderboardData, loading, userRank } = isStudentView ? studentLeaderboard : orgLeaderboard
+  
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -78,7 +79,7 @@ export function LeaderboardModal({ isOpen, onClose }: LeaderboardModalProps) {
         <div id="leaderboard-description" className="space-y-6">
           <p className="text-muted-foreground text-center">
             {isStudentView 
-              ? 'See how students are ranking based on their eco-points' 
+              ? 'See how students are ranking based on their eco-points across different regions' 
               : 'See how organizations across different regions are making an environmental impact'
             }
           </p>
@@ -89,7 +90,7 @@ export function LeaderboardModal({ isOpen, onClose }: LeaderboardModalProps) {
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <TreePine className="h-5 w-5 text-primary" />
-                  {isStudentView ? 'Your Rank' : 'Your Organization\'s Rank'}
+                  {isStudentView ? `Your Rank - #${userRank.rank}` : `Your Organization\'s Rank - #${userRank.rank}`}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -130,7 +131,7 @@ export function LeaderboardModal({ isOpen, onClose }: LeaderboardModalProps) {
           {/* Top Organizations */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">
-              {isStudentView ? 'Top Students' : 'Top Organizations by Region'}
+              {isStudentView ? 'Top Students by Region' : 'Top Organizations by Region'}
             </h3>
             <div className="space-y-3">
               {leaderboardData?.map((entry, index) => {

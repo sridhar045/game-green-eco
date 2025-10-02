@@ -42,7 +42,7 @@ export function useStudentLeaderboard() {
           .not('display_name', 'is', null)
 
         // Filter based on profile settings
-        if (profile.role === 'organization' && profile.organization_code) {
+        if (profile.role === 'student' && profile.organization_code) {
           // Organization: filter by organization_code
           query = query.eq('organization_code', profile.organization_code)
         } else if (profile.region_district) {

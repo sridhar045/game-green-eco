@@ -20,7 +20,7 @@ export function ActiveProgramsListModal({ isOpen, onClose }: ActiveProgramsListM
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        async function fetchStudents() {
+        async function fetchMissions() {
             if (!profile?.organization_code || profile.role !== 'organization') return
 
             setLoading(true)
@@ -28,7 +28,7 @@ export function ActiveProgramsListModal({ isOpen, onClose }: ActiveProgramsListM
                 const { data, error } = await supabase
                     .from('missions')
                     .select('title,id,description,points,difficulty,category,is_active')
-                    .order('eco_points', { ascending: false })
+                    .order('points', { ascending: false })
 
                 if (error) throw error
                 setMissions(data || [])
@@ -41,9 +41,11 @@ export function ActiveProgramsListModal({ isOpen, onClose }: ActiveProgramsListM
         }
 
         if (isOpen) {
-            fetchStudents()
+            fetchMissions()
         }
     }, [isOpen, profile])
+    console.log(missions,filteredmissions,'missions');
+    
 
     useEffect(() => {
         if (!searchQuery.trim()) {

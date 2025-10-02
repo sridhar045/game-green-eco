@@ -4,7 +4,6 @@ import { EcoButton } from "@/components/ui/eco-button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Separator } from "@/components/ui/separator"
 import { Award, Star, Trophy, Leaf, TreePine, ArrowLeft, Settings, Building2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
@@ -14,11 +13,27 @@ import { supabase } from "@/integrations/supabase/client"
 export default function Profile() {
   const { profile } = useProfile()
   const navigate = useNavigate()
-  const [orgStats, setOrgStats] = useState({ approved: 0, rejected: 0, totalStudents: 0 })
+  const [orgStats, setOrgStats] = useState({ approved: 0, rejected: 0, totalStudents: 0, totalMissions: 0 })
+  const [organizationName, setOrganizationName] = useState('')
+  const [totalMissionsOrganizationCanApproveOrReject, setTotalMissionsOrganizationCanApproveOrReject] = useState(orgStats.totalStudents * orgStats.totalMissions)
+
+
+
 
   useEffect(() => {
     async function fetchOrgStats() {
-      if (!profile || profile.role !== 'organization' || !profile.organization_code) return
+      if (!profile || !profile.organization_code) return
+
+      if (profile.role === 'student') {
+        // get organization name
+        const { data: orgName } = await supabase
+          .from('profiles')
+          .select('organization_code')
+          .eq('organization_code', profile.organization_code)
+          .eq('role', 'organization')
+        setOrganizationName(orgName[0].organization_code)
+        return
+      }
 
       try {
         // First, get all student user IDs for this organization
@@ -29,11 +44,15 @@ export default function Profile() {
           .eq('role', 'student')
 
         const studentIds = students?.map(s => s.user_id) || []
-
         if (studentIds.length === 0) {
-          setOrgStats({ approved: 0, rejected: 0, totalStudents: 0 })
+          setOrgStats({ approved: 0, rejected: 0, totalStudents: 0, totalMissions: 0 })
           return
         }
+
+        // Fetch total missions
+        const { count: totalMissionsCount } = await supabase
+          .from('missions')
+          .select('*', { count: 'exact', head: true })
 
         // Fetch approved missions
         const { count: approvedCount } = await supabase
@@ -49,10 +68,12 @@ export default function Profile() {
           .eq('status', 'rejected')
           .in('user_id', studentIds)
 
+
         setOrgStats({
           approved: approvedCount || 0,
           rejected: rejectedCount || 0,
-          totalStudents: studentIds.length
+          totalStudents: studentIds.length,
+          totalMissions: totalMissionsCount || 0,
         })
       } catch (error) {
         console.error('Error fetching org stats:', error)
@@ -60,20 +81,22 @@ export default function Profile() {
     }
 
     fetchOrgStats()
-  }, [profile])
+    setTotalMissionsOrganizationCanApproveOrReject(orgStats.totalStudents * orgStats.totalMissions)
+
+  }, [orgStats.totalMissions, orgStats.totalStudents, profile])
 
   if (!profile) return null
 
   const isOrganization = profile.role === 'organization'
   const pointsPerLevel = isOrganization ? 2000 : 200
-  
+
   // Calculate real level progress
-  const currentLevel = profile.level || 1
-  const currentPoints = profile.eco_points || 0
-  const pointsForCurrentLevel = (currentLevel - 1) * pointsPerLevel
-  const pointsForNextLevel = currentLevel * pointsPerLevel
-  const pointsInCurrentLevel = currentPoints - pointsForCurrentLevel
-  const pointsNeededForNextLevel = pointsForNextLevel - pointsForCurrentLevel
+  const currentLevel = profile.level || 1   //3
+  const currentPoints = profile.eco_points || 0     //750
+  const pointsForCurrentLevel = currentLevel * pointsPerLevel     //600
+  const pointsForNextLevel = (currentLevel + 1) * pointsPerLevel        //800
+  const pointsInCurrentLevel = currentPoints - pointsForCurrentLevel    //150
+  const pointsNeededForNextLevel = pointsForNextLevel - pointsForCurrentLevel   // 200
   const levelProgress = Math.min(100, Math.round((pointsInCurrentLevel / pointsNeededForNextLevel) * 100))
 
   const achievements = [
@@ -86,17 +109,17 @@ export default function Profile() {
   ]
 
   const studentStats = [
-    { label: "Total Points", value: profile?.eco_points || 0, max: pointsPerLevel },
+    { label: "Total Points", value: profile?.eco_points || 0, max: pointsForNextLevel },
     { label: "Level Progress", value: levelProgress, max: 100 },
     { label: "Lessons Completed", value: profile?.completed_lessons || 0, max: 20 },
     { label: "Missions Completed", value: profile?.completed_missions || 0, max: 15 }
   ]
 
   const organizationStats = [
-    { label: "Total Eco Points", value: profile?.eco_points || 0, max: pointsPerLevel * 2 },
+    { label: "Total Eco Points", value: profile?.eco_points || 0, max: pointsPerLevel },
     { label: "Level Progress", value: levelProgress, max: 100 },
-    { label: "Missions Approved", value: orgStats.approved, max: Math.max(orgStats.approved + 10, 50) },
-    { label: "Missions Rejected", value: orgStats.rejected, max: Math.max(orgStats.rejected + 10, 50) },
+    { label: "Missions Approved", value: orgStats.approved, max: Math.min(orgStats.approved + 10, totalMissionsOrganizationCanApproveOrReject) },
+    { label: "Missions Rejected", value: orgStats.rejected, max: Math.max(orgStats.rejected + 10, totalMissionsOrganizationCanApproveOrReject) },
     { label: "Total Students", value: orgStats.totalStudents, max: Math.max(orgStats.totalStudents + 10, 100) }
   ]
 
@@ -131,13 +154,13 @@ export default function Profile() {
                   {profile.display_name?.charAt(0) || profile.email.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              
+
               <div className="flex-1">
                 <h1 className="text-3xl font-bold text-foreground mb-2">
                   {profile.display_name || 'Eco Warrior'}
                 </h1>
                 <p className="text-muted-foreground mb-4">{profile.email}</p>
-                
+
                 <div className="flex items-center gap-4 flex-wrap">
                   <Badge variant="secondary" className="flex items-center gap-1 text-lg px-3 py-1">
                     <Star className="h-4 w-4" />
@@ -147,10 +170,10 @@ export default function Profile() {
                     <Leaf className="h-4 w-4 text-primary" />
                     {profile.eco_points} Points
                   </Badge>
-                   {profile.role === 'student' && profile.organization_name && (
+                  {profile.role === 'student' && organizationName && (
                     <Badge variant="outline" className="flex items-center gap-1 text-lg px-3 py-1 bg-accent/10 border-accent/20 text-accent">
                       <Building2 className="h-4 w-4" />
-                      {profile.organization_name}
+                      {organizationName}
                     </Badge>
                   )}
                   {profile.role === 'organization' && profile.organization_code && (
@@ -201,26 +224,22 @@ export default function Profile() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {achievements.map((achievement, index) => (
-                  <div 
+                  <div
                     key={achievement.id}
-                    className={`p-4 rounded-lg border transition-all duration-300 ${
-                      achievement.earned 
-                        ? 'bg-primary/5 border-primary/20 hover:bg-primary/10' 
-                        : 'bg-muted/20 border-muted opacity-60'
-                    }`}
+                    className={`p-4 rounded-lg border transition-all duration-300 ${achievement.earned
+                      ? 'bg-primary/5 border-primary/20 hover:bg-primary/10'
+                      : 'bg-muted/20 border-muted opacity-60'
+                      }`}
                   >
                     <div className="flex items-center gap-3 mb-2">
-                      <div className={`p-2 rounded-full ${
-                        achievement.earned ? 'bg-primary/10' : 'bg-muted/30'
-                      }`}>
-                        <achievement.icon className={`h-5 w-5 ${
-                          achievement.earned ? 'text-primary' : 'text-muted-foreground'
-                        }`} />
+                      <div className={`p-2 rounded-full ${achievement.earned ? 'bg-primary/10' : 'bg-muted/30'
+                        }`}>
+                        <achievement.icon className={`h-5 w-5 ${achievement.earned ? 'text-primary' : 'text-muted-foreground'
+                          }`} />
                       </div>
                       <div className="flex-1">
-                        <h3 className={`font-semibold ${
-                          achievement.earned ? 'text-foreground' : 'text-muted-foreground'
-                        }`}>
+                        <h3 className={`font-semibold ${achievement.earned ? 'text-foreground' : 'text-muted-foreground'
+                          }`}>
                           {achievement.name}
                         </h3>
                       </div>
