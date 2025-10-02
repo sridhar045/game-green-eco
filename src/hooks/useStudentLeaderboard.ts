@@ -29,12 +29,34 @@ export function useStudentLeaderboard() {
   useEffect(() => {
     async function fetchStudentLeaderboard() {
       try {
-        // Fetch student leaderboard data ordered by eco points
-        const { data: students, error } = await supabase
+        if (!profile) {
+          setLoading(false)
+          return
+        }
+
+        // Build query based on user's role and region
+        let query = supabase
           .from('profiles')
           .select('user_id, display_name, eco_points, completed_missions, completed_lessons, level, organization_name, region_district, region_state')
           .eq('role', 'student')
           .not('display_name', 'is', null)
+
+        // Filter based on profile settings
+        if (profile.role === 'organization' && profile.organization_code) {
+          // Organization: filter by organization_code
+          query = query.eq('organization_code', profile.organization_code)
+        } else if (profile.region_district) {
+          // District level: filter by district
+          query = query.eq('region_district', profile.region_district)
+        } else if (profile.region_state) {
+          // State level: filter by state
+          query = query.eq('region_state', profile.region_state)
+        } else if (profile.region_country) {
+          // Country level: filter by country
+          query = query.eq('region_country', profile.region_country)
+        }
+
+        const { data: students, error } = await query
           .order('eco_points', { ascending: false })
           .limit(50)
 

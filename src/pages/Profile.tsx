@@ -8,9 +8,59 @@ import { Separator } from "@/components/ui/separator"
 import { Award, Star, Trophy, Leaf, TreePine, ArrowLeft, Settings, Building2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
+import { useState, useEffect } from "react"
+import { supabase } from "@/integrations/supabase/client"
+
 export default function Profile() {
   const { profile } = useProfile()
   const navigate = useNavigate()
+  const [orgStats, setOrgStats] = useState({ approved: 0, rejected: 0, totalStudents: 0 })
+
+  useEffect(() => {
+    async function fetchOrgStats() {
+      if (!profile || profile.role !== 'organization' || !profile.organization_code) return
+
+      try {
+        // First, get all student user IDs for this organization
+        const { data: students } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('organization_code', profile.organization_code)
+          .eq('role', 'student')
+
+        const studentIds = students?.map(s => s.user_id) || []
+
+        if (studentIds.length === 0) {
+          setOrgStats({ approved: 0, rejected: 0, totalStudents: 0 })
+          return
+        }
+
+        // Fetch approved missions
+        const { count: approvedCount } = await supabase
+          .from('mission_submissions')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'approved')
+          .in('user_id', studentIds)
+
+        // Fetch rejected missions
+        const { count: rejectedCount } = await supabase
+          .from('mission_submissions')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'rejected')
+          .in('user_id', studentIds)
+
+        setOrgStats({
+          approved: approvedCount || 0,
+          rejected: rejectedCount || 0,
+          totalStudents: studentIds.length
+        })
+      } catch (error) {
+        console.error('Error fetching org stats:', error)
+      }
+    }
+
+    fetchOrgStats()
+  }, [profile])
 
   if (!profile) return null
 
@@ -44,7 +94,10 @@ export default function Profile() {
 
   const organizationStats = [
     { label: "Total Eco Points", value: profile?.eco_points || 0, max: pointsPerLevel * 2 },
-    { label: "Level Progress", value: levelProgress, max: 100 }
+    { label: "Level Progress", value: levelProgress, max: 100 },
+    { label: "Missions Approved", value: orgStats.approved, max: Math.max(orgStats.approved + 10, 50) },
+    { label: "Missions Rejected", value: orgStats.rejected, max: Math.max(orgStats.rejected + 10, 50) },
+    { label: "Total Students", value: orgStats.totalStudents, max: Math.max(orgStats.totalStudents + 10, 100) }
   ]
 
   const stats = isOrganization ? organizationStats : studentStats
@@ -94,10 +147,10 @@ export default function Profile() {
                     <Leaf className="h-4 w-4 text-primary" />
                     {profile.eco_points} Points
                   </Badge>
-                  {profile.role === 'student' && profile.organization_code && (
+                   {profile.role === 'student' && profile.organization_name && (
                     <Badge variant="outline" className="flex items-center gap-1 text-lg px-3 py-1 bg-accent/10 border-accent/20 text-accent">
                       <Building2 className="h-4 w-4" />
-                      {profile.fetched_organization_name || profile.organization_code}
+                      {profile.organization_name}
                     </Badge>
                   )}
                   {profile.role === 'organization' && profile.organization_code && (

@@ -66,8 +66,8 @@ export default function LessonPlayer() {
     }
   ]
 
-  // Sample video URL - in real app, this would come from lesson.content.video_url
-  const sampleVideoUrl = lesson?.content?.video_url || "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  // Sample video URL - Using a real environmental video
+  const sampleVideoUrl = lesson?.content?.video_url || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
 
   useEffect(() => {
     if (id && user) {
@@ -112,7 +112,18 @@ export default function LessonPlayer() {
         .maybeSingle()
 
       setLesson(lessonData)
-      setProgress(progressData?.progress_percentage || 0)
+      const currentProgress = progressData?.progress_percentage || 0
+      setProgress(currentProgress)
+      
+      // Resume from correct stage based on progress
+      if (currentProgress >= 67 && currentProgress < 100) {
+        setCurrentStage(LessonStage.MISSIONS)
+      } else if (currentProgress >= 33 && currentProgress < 67) {
+        setCurrentStage(LessonStage.QUIZ)
+      } else if (currentProgress === 100) {
+        setCurrentStage(LessonStage.COMPLETED)
+      }
+      
       setLoading(false)
     } catch (error) {
       console.error('Error:', error)
@@ -124,10 +135,12 @@ export default function LessonPlayer() {
     if (!user || !id) return
 
     try {
+      const validProgress = Math.max(0, Math.min(100, Math.round(newProgress)))
+      
       const updateData: any = {
         user_id: user.id,
         lesson_id: id,
-        progress_percentage: newProgress,
+        progress_percentage: validProgress,
         is_completed: completed,
         last_accessed_at: new Date().toISOString()
       }
@@ -139,14 +152,13 @@ export default function LessonPlayer() {
       const { error } = await supabase
         .from('lesson_progress')
         .upsert(updateData, {
-          onConflict: 'user_id,lesson_id',
-          ignoreDuplicates: false
+          onConflict: 'user_id,lesson_id'
         })
 
       if (error) {
         console.error('Error updating progress:', error)
       } else {
-        setProgress(newProgress)
+        setProgress(validProgress)
         if (completed) {
           toast.success("Lesson completed! Well done!")
           setCurrentStage(LessonStage.COMPLETED)

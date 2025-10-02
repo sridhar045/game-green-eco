@@ -1,10 +1,10 @@
 import { useProfile } from "@/hooks/useProfile"
 import { supabase } from "@/integrations/supabase/client"
-import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog"
-import { Search, Badge, BookOpen, Target } from "lucide-react"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Search, BookOpen, Target } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "../ui/card"
-import { DialogHeader } from "../ui/dialog"
 import { Input } from "../ui/input"
 
 interface ActiveProgramsListModalProps {
@@ -60,15 +60,15 @@ export function ActiveProgramsListModal({ isOpen, onClose }: ActiveProgramsListM
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <BookOpen className="h-4 w-4 text-accent" />
+                        <BookOpen className="h-5 w-5 text-accent" />
                         Available Missions
                     </DialogTitle>
-                    {/* <DialogDescription>
-                        View and manage students linked to organization code: {profile?.organization_code}
-                    </DialogDescription> */}
+                    <DialogDescription>
+                        Browse all active missions available for students
+                    </DialogDescription>
                 </DialogHeader>
 
                 <div className="relative mb-4">

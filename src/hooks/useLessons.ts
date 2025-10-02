@@ -84,7 +84,7 @@ export function useLessons() {
       const updateData: any = {
         user_id: user.id,
         lesson_id: lessonId,
-        progress_percentage: percentage,
+        progress_percentage: Math.max(0, Math.min(100, Math.round(percentage))),
         is_completed: completed,
         last_accessed_at: new Date().toISOString()
       }
@@ -95,7 +95,9 @@ export function useLessons() {
 
       const { error } = await supabase
         .from('lesson_progress')
-        .upsert(updateData)
+        .upsert(updateData, {
+          onConflict: 'user_id,lesson_id'
+        })
 
       if (error) {
         console.error('Error updating progress:', error)
