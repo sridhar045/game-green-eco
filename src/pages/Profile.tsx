@@ -91,13 +91,15 @@ export default function Profile() {
   const pointsPerLevel = isOrganization ? 2000 : 200
 
   // Calculate real level progress
-  const currentLevel = profile.level || 1   //3
-  const currentPoints = profile.eco_points || 0     //750
-  const pointsForCurrentLevel = currentLevel * pointsPerLevel     //600
-  const pointsForNextLevel = (currentLevel + 1) * pointsPerLevel        //800
-  const pointsInCurrentLevel = currentPoints - pointsForCurrentLevel    //150
-  const pointsNeededForNextLevel = pointsForNextLevel - pointsForCurrentLevel   // 200
+  const currentLevel = profile.level - 1 || 0
+  const currentPoints = profile.eco_points || 0
+  const pointsForCurrentLevel = currentLevel * pointsPerLevel
+  const pointsForNextLevel = (currentLevel + 1) * pointsPerLevel
+  const pointsInCurrentLevel = currentPoints - pointsForCurrentLevel
+  const pointsNeededForNextLevel = pointsForNextLevel - pointsForCurrentLevel
   const levelProgress = Math.min(100, Math.round((pointsInCurrentLevel / pointsNeededForNextLevel) * 100))
+  console.log(currentLevel,'level');
+  
 
   const achievements = [
     { id: 1, name: "Climate Champion", description: "Completed 10 climate lessons", icon: Award, earned: (profile.completed_lessons || 0) >= 10 },
@@ -109,18 +111,18 @@ export default function Profile() {
   ]
 
   const studentStats = [
-    { label: "Total Points", value: profile?.eco_points || 0, max: pointsForNextLevel },
-    { label: "Level Progress", value: levelProgress, max: 100 },
-    { label: "Lessons Completed", value: profile?.completed_lessons || 0, max: 20 },
-    { label: "Missions Completed", value: profile?.completed_missions || 0, max: 15 }
+    { label: "Total Points", value: profile?.eco_points || 0, info: '', max: pointsForNextLevel },
+    { label: "Level Progress", value: levelProgress, info: `${pointsInCurrentLevel}/200`, max: 100 },
+    { label: "Lessons Completed", value: profile?.completed_lessons || 0, info: '', max: 20 },
+    { label: "Missions Completed", value: profile?.completed_missions || 0, info: '', max: 15 }
   ]
 
   const organizationStats = [
-    { label: "Total Eco Points", value: profile?.eco_points || 0, max: pointsPerLevel },
-    { label: "Level Progress", value: levelProgress, max: 100 },
-    { label: "Missions Approved", value: orgStats.approved, max: Math.min(orgStats.approved + 10, totalMissionsOrganizationCanApproveOrReject) },
-    { label: "Missions Rejected", value: orgStats.rejected, max: Math.max(orgStats.rejected + 10, totalMissionsOrganizationCanApproveOrReject) },
-    { label: "Total Students", value: orgStats.totalStudents, max: Math.max(orgStats.totalStudents + 10, 100) }
+    { label: "Total Eco Points", value: profile?.eco_points || 0, info: '',max: pointsPerLevel },
+    { label: "Level Progress", value: levelProgress, info: '',max: 100 },
+    { label: "Missions Approved", value: orgStats.approved, info: '',max: Math.min(orgStats.approved + 10, totalMissionsOrganizationCanApproveOrReject) },
+    { label: "Missions Rejected", value: orgStats.rejected, info: '',max: Math.max(orgStats.rejected + 10, totalMissionsOrganizationCanApproveOrReject) },
+    { label: "Total Students", value: orgStats.totalStudents, info: '', max: Math.max(orgStats.totalStudents + 10, 100) }
   ]
 
   const stats = isOrganization ? organizationStats : studentStats
@@ -164,7 +166,7 @@ export default function Profile() {
                 <div className="flex items-center gap-4 flex-wrap">
                   <Badge variant="secondary" className="flex items-center gap-1 text-lg px-3 py-1">
                     <Star className="h-4 w-4" />
-                    Level {profile.level}
+                    Level {currentLevel}
                   </Badge>
                   <Badge variant="outline" className="flex items-center gap-1 text-lg px-3 py-1">
                     <Leaf className="h-4 w-4 text-primary" />
@@ -197,7 +199,7 @@ export default function Profile() {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold">{stat.value}</span>
+                  <span className="text-2xl font-bold flex items-center">{stat.value} {stat.info && (<p className="text-gray-400 text-sm ms-2">{`(${stat.info})`}</p>)}</span>
                   <span className="text-sm text-muted-foreground">/ {stat.max}</span>
                 </div>
                 <Progress value={(stat.value / stat.max) * 100} className="h-2" />

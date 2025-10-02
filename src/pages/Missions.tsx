@@ -93,7 +93,7 @@ export default function Missions() {
           </EcoButton>
           
           <EcoButton
-            variant="outline"
+            variant="eco"
             onClick={() => setLeaderboardOpen(true)}
             className="flex items-center gap-2"
           >

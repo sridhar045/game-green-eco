@@ -55,14 +55,17 @@ export function UserHeader() {
                 <Badge variant="secondary" className="capitalize">
                   {profile.role}
                 </Badge>
-                <div className="flex items-center gap-1 text-primary">
+                <Badge variant="secondary" className="capitalize flex items-center gap-1">
                   <Star className="h-4 w-4" />
                   <span className="font-medium">Level {getUserLevel(profile.eco_points)}</span>
-                </div>
-                <div className="flex items-center gap-1 text-accent">
+                </Badge>
+                 <Badge variant="secondary" className="capitalize">
+                  {profile.streak_days > 1 ? `🔥 ${profile.streak_days} days streak` : `🔥 ${profile.streak_days} day streak`}
+                </Badge>
+                <Badge variant="secondary" className="capitalize flex items-center gap-1">
                   <Leaf className="h-4 w-4" />
                   <span className="font-medium">{profile.eco_points} Eco Points</span>
-                </div>
+                </Badge>
               </div>
             </div>
           </div>
