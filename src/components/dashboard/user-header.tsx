@@ -24,7 +24,7 @@ export function UserHeader() {
   }
 
   const getUserLevel = (ecoPoints: number) => {
-    return Math.floor(ecoPoints / 200) + 1
+    return Math.floor(ecoPoints / 200)
   }
 
   const getInitials = (name: string) => {
