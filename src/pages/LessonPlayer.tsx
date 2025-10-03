@@ -160,7 +160,7 @@ export default function LessonPlayer() {
       } else {
         setProgress(validProgress)
         if (completed) {
-          toast.success("Lesson completed! Well done!")
+          toast.success("🎉 Lesson Completed! Well done!", { duration: 4000, className: "animate-enter" })
           setCurrentStage(LessonStage.COMPLETED)
         }
       }
@@ -202,7 +202,7 @@ export default function LessonPlayer() {
       setCurrentStage(LessonStage.MISSIONS)
       
       if (score >= 70) {
-        toast.success(`Great job! You scored ${score}%. Now check out the missions!`)
+        toast.success(`🌟 Quiz Passed! You scored ${score}%. Ready for missions!`, { duration: 3000, className: "animate-scale-in" })
       } else {
         toast.info(`You scored ${score}%. You can still proceed to missions!`)
       }

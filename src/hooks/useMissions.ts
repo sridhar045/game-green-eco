@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
 import type { Tables } from '@/integrations/supabase/types'
+import { toast } from "sonner"
 
 type Mission = Tables<'missions'>
 type MissionSubmission = Tables<'mission_submissions'>
@@ -125,6 +126,8 @@ export function useMissions() {
 
       if (error) {
         console.error('Error submitting mission:', error)
+      } else {
+        toast.success("Mission submitted successfully! It's under review.")
       }
     } catch (error) {
       console.error('Error submitting mission:', error)

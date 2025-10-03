@@ -1,6 +1,6 @@
 import { useProfile } from "@/hooks/useProfile"
 import { supabase } from "@/integrations/supabase/client"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Search, BookOpen, Target } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useState, useEffect } from "react"
@@ -62,16 +62,16 @@ export function ActiveProgramsListModal({ isOpen, onClose }: ActiveProgramsListM
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" aria-describedby="active-programs-description">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <BookOpen className="h-5 w-5 text-accent" />
                         Available Missions
                     </DialogTitle>
-                    <DialogDescription>
-                        Browse all active missions available for students
-                    </DialogDescription>
                 </DialogHeader>
+                <p id="active-programs-description" className="text-sm text-muted-foreground mb-4">
+                    Browse all active missions available for students
+                </p>
 
                 <div className="relative mb-4">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />

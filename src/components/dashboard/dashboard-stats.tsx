@@ -19,10 +19,11 @@ export function DashboardStats() {
       .from('lesson_progress')
       .select(`
         *,
-        lessons (title, description, duration_minutes)
+        lessons (title, description, duration_minutes, category, difficulty)
       `)
       .eq('user_id', user.id)
       .eq('is_completed', true)
+      .order('completed_at', { ascending: false })
     return data || []
   }
 

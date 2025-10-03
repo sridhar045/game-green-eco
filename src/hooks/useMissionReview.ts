@@ -117,7 +117,7 @@ export function useMissionReview() {
         return false
       }
 
-      // Remove from local state
+      // Remove from local state and show celebration
       setSubmissions(prev => prev.filter(sub => sub.id !== submissionId))
       return true
     } catch (error) {

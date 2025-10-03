@@ -120,46 +120,46 @@ export function MissionReviewModal({ isOpen, onClose }: MissionReviewModalProps)
                         <p className="font-medium">Submission Details:</p>
                         {typeof submission.submission_data === 'object' && (
                           <div className="space-y-2">
-                            {Object.entries(submission.submission_data as Record<string, any>).map(([key, value]) => (
-                              <div key={key} className="bg-muted/50 p-3 rounded-md">
-                                <p className="text-sm font-medium capitalize mb-1">{key.replace(/_/g, ' ')}:</p>
-                                {key.includes('video') || key.includes('url') || key.includes('link') ? (
-                                  <div>
-                                    {typeof value === 'string' && (value.includes('youtube.com') || value.includes('youtu.be')) ? (
-                                      <div className="space-y-2">
-                                        <a 
-                                          href={value as string} 
-                                          target="_blank" 
-                                          rel="noopener noreferrer"
-                                          className="text-primary hover:underline text-sm flex items-center gap-1"
-                                        >
-                                          Watch Video →
-                                        </a>
-                                        <div className="aspect-video rounded-md overflow-hidden">
-                                          <iframe
-                                            src={`https://www.youtube.com/embed/${(value as string).includes('youtu.be') ? (value as string).split('youtu.be/')[1].split('?')[0] : new URLSearchParams(new URL(value as string).search).get('v')}`}
-                                            className="w-full h-full"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                            allowFullScreen
-                                          />
+                            {Object.entries(submission.submission_data as Record<string, unknown>).map(([key, value]) => {
+                              const val = String(value ?? '')
+                              const isVideoField = key.toLowerCase().includes('video') || key.toLowerCase().includes('url') || key.toLowerCase().includes('link')
+                              const isYouTube = val.includes('youtube.com') || val.includes('youtu.be')
+                              const isDirectVideo = /\.(mp4|webm|ogg)$/i.test(val)
+                              return (
+                                <div key={key} className="bg-muted/50 p-3 rounded-md">
+                                  <p className="text-sm font-medium capitalize mb-1">{key.replace(/_/g, ' ')}:</p>
+                                  {isVideoField ? (
+                                    <div className="space-y-2">
+                                      {isYouTube ? (
+                                        <div className="space-y-2">
+                                          <a href={val} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm flex items-center gap-1">
+                                            Watch Video →
+                                          </a>
+                                          <div className="aspect-video rounded-md overflow-hidden">
+                                            <iframe
+                                              src={`https://www.youtube.com/embed/${val.includes('youtu.be') ? val.split('youtu.be/')[1].split('?')[0] : new URLSearchParams(new URL(val).search).get('v')}`}
+                                              className="w-full h-full"
+                                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                              allowFullScreen
+                                            />
+                                          </div>
                                         </div>
-                                      </div>
-                                    ) : (
-                                      <a 
-                                        href={value as string} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="text-primary hover:underline text-sm"
-                                      >
-                                        {value as string}
-                                      </a>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <p className="text-sm">{String(value)}</p>
-                                )}
-                              </div>
-                            ))}
+                                      ) : isDirectVideo ? (
+                                        <video controls className="w-full rounded-md" src={val}>
+                                          Your browser does not support video playback.
+                                        </video>
+                                      ) : (
+                                        <a href={val} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm">
+                                          {val}
+                                        </a>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <p className="text-sm">{val}</p>
+                                  )}
+                                </div>
+                              )
+                            })}
                           </div>
                         )}
                       </div>
