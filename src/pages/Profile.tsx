@@ -22,18 +22,15 @@ export default function Profile() {
 
   useEffect(() => {
     async function fetchOrgStats() {
-      if (!profile || !profile.organization_code) return
+      if (!profile) return
 
       if (profile.role === 'student') {
-        // get organization name
-        const { data: orgName } = await supabase
-          .from('profiles')
-          .select('organization_code')
-          .eq('organization_code', profile.organization_code)
-          .eq('role', 'organization')
-        setOrganizationName(orgName[0].organization_code)
+        // Use denormalized organization_name from own profile (kept in sync via trigger)
+        setOrganizationName(profile.organization_name || '')
         return
       }
+
+      if (!profile.organization_code) return
 
       try {
         // First, get all student user IDs for this organization

@@ -10,9 +10,11 @@ interface VideoPlayerProps {
   onVideoComplete: () => void
   onProgressUpdate: (progress: number) => void
   duration: number
+  userId?: string
+  lessonId?: string
 }
 
-export function VideoPlayer({ videoUrl, onVideoComplete, onProgressUpdate, duration }: VideoPlayerProps) {
+export function VideoPlayer({ videoUrl, onVideoComplete, onProgressUpdate, duration, userId, lessonId }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
@@ -32,9 +34,8 @@ export function VideoPlayer({ videoUrl, onVideoComplete, onProgressUpdate, durat
       onProgressUpdate(progress)
       
       // Save video progress to localStorage for resume functionality
-      if (videoUrl) {
-        localStorage.setItem(`video_progress_${videoUrl}`, video.currentTime.toString())
-      }
+      const storageKey = `video_progress_${userId || 'anon'}_${lessonId || videoUrl || 'unknown'}`
+      localStorage.setItem(storageKey, video.currentTime.toString())
     }
 
     const handleEnded = () => {

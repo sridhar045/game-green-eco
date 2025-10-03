@@ -34,31 +34,9 @@ export function useStudentLeaderboard() {
           return
         }
 
-        // Build query based on user's role and region
-        let query = supabase
-          .from('profiles')
-          .select('user_id, display_name, eco_points, completed_missions, completed_lessons, level, organization_name, region_district, region_state')
-          .eq('role', 'student')
-          .not('display_name', 'is', null)
-
-        // Filter based on profile settings
-        if (profile.role === 'student' && profile.organization_code) {
-          // Organization: filter by organization_code
-          query = query.eq('organization_code', profile.organization_code)
-        } else if (profile.region_district) {
-          // District level: filter by district
-          query = query.eq('region_district', profile.region_district)
-        } else if (profile.region_state) {
-          // State level: filter by state
-          query = query.eq('region_state', profile.region_state)
-        } else if (profile.region_country) {
-          // Country level: filter by country
-          query = query.eq('region_country', profile.region_country)
-        }
-
-        const { data: students, error } = await query
-          .order('eco_points', { ascending: false })
-          .limit(50)
+        // Fetch leaderboard via secured RPC to respect RLS while scoping by your region
+        const { data: students, error } = await supabase
+          .rpc('get_student_leaderboard') as any
 
         if (error) {
           console.error('Error fetching student leaderboard:', error)
@@ -70,12 +48,12 @@ export function useStudentLeaderboard() {
         // Find user's rank if profile exists
         if (profile && students) {
           const userIndex = students.findIndex(
-            student => student.user_id === user?.id
+            (student: StudentLeaderboardEntry) => student.user_id === user?.id
           )
 
           if (userIndex !== -1) {
             setUserRank({
-              ...students[userIndex],
+              ...(students[userIndex] as StudentLeaderboardEntry),
               rank: userIndex + 1
             })
           }

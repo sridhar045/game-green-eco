@@ -131,16 +131,16 @@ export function DetailsModal({ isOpen, onClose, type, data }: DetailsModalProps)
       case 'badges':
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {data.map((badge, index) => (
-              <Card key={badge.id || index}>
+            {data.map((badgeItem, index) => (
+              <Card key={badgeItem.id || index}>
                 <CardContent className="p-4 text-center">
                   <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                     <Award className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="font-medium mb-1">{badge.name}</h3>
-                  <p className="text-sm text-muted-foreground mb-2">{badge.description}</p>
+                  <h3 className="font-medium mb-1">{badgeItem.badges?.name || badgeItem.name}</h3>
+                  <p className="text-sm text-muted-foreground mb-2">{badgeItem.badges?.description || badgeItem.description}</p>
                   <div className="text-xs text-muted-foreground">
-                    Earned on {new Date(badge.earned_at).toLocaleDateString()}
+                    Earned on {new Date(badgeItem.earned_at).toLocaleDateString()}
                   </div>
                 </CardContent>
               </Card>

@@ -239,6 +239,8 @@ export default function LessonPlayer() {
             onVideoComplete={handleVideoComplete}
             onProgressUpdate={handleVideoProgress}
             duration={lesson?.duration_minutes || 10}
+            userId={user?.id}
+            lessonId={id}
           />
         )
       case LessonStage.QUIZ:
@@ -278,7 +280,7 @@ export default function LessonPlayer() {
         )
       case LessonStage.COMPLETED:
         return (
-          <Card>
+          <Card className="animate-enter">
             <CardContent className="text-center py-12">
               <Award className="h-16 w-16 text-primary mx-auto mb-4" />
               <h3 className="text-2xl font-bold mb-2">Lesson Complete!</h3>
