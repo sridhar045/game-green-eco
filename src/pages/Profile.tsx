@@ -4,14 +4,15 @@ import { EcoButton } from "@/components/ui/eco-button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Award, Star, Trophy, Leaf, TreePine, ArrowLeft, Settings, Building2 } from "lucide-react"
+import { Trophy, Star, Leaf, ArrowLeft, Settings, Building2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
+import { useAuth } from "@/contexts/AuthContext"
 
 export default function Profile() {
   const { profile } = useProfile()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const [orgStats, setOrgStats] = useState({ approved: 0, rejected: 0, totalStudents: 0, totalMissions: 0 })
   const [organizationName, setOrganizationName] = useState('')
@@ -102,17 +103,17 @@ export default function Profile() {
 
   useEffect(() => {
     async function fetchEarnedBadges() {
-      if (!profile) return
+      if (!profile || !user) return
       const { data } = await supabase
         .from('user_badges')
         .select(`id, earned_at, badges:badge_id ( name, description, image_url )`)
-        .eq('user_id', profile.user_id)
+        .eq('user_id', user.id)
         .order('earned_at', { ascending: false })
       const mapped = (data || []).map((ub: any) => ({ id: ub.id, earned_at: ub.earned_at, badge: ub.badges }))
       setEarnedBadges(mapped)
     }
     fetchEarnedBadges()
-  }, [profile])
+  }, [profile, user])
 
   const studentStats = [
     { label: "Total Points", value: profile?.eco_points || 0, info: '', max: pointsForNextLevel },
@@ -215,52 +216,40 @@ export default function Profile() {
           ))}
         </div>
 
-        {/* Achievements - Only for students */}
+        {/* Earned Badges - Only for students */}
         {!isOrganization && (
           <Card className="eco-shadow">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Trophy className="h-5 w-5 text-eco-sun" />
-                Achievements
+                Earned Badges
               </CardTitle>
               <CardDescription>
-                Your environmental impact milestones and badges
+                Badges you have earned so far
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {achievements.map((achievement, index) => (
-                  <div
-                    key={achievement.id}
-                    className={`p-4 rounded-lg border transition-all duration-300 ${achievement.earned
-                      ? 'bg-primary/5 border-primary/20 hover:bg-primary/10'
-                      : 'bg-muted/20 border-muted opacity-60'
-                      }`}
-                  >
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className={`p-2 rounded-full ${achievement.earned ? 'bg-primary/10' : 'bg-muted/30'
-                        }`}>
-                        <achievement.icon className={`h-5 w-5 ${achievement.earned ? 'text-primary' : 'text-muted-foreground'
-                          }`} />
+              {earnedBadges.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No badges earned yet — complete lessons and missions to earn badges.</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {earnedBadges.map((item) => (
+                    <div key={item.id} className="p-4 rounded-lg border bg-primary/5 border-primary/20">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/10">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={item.badge.image_url} alt={`${item.badge.name} badge`} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold">{item.badge.name}</h3>
+                          <p className="text-xs text-muted-foreground">Earned on {new Date(item.earned_at).toLocaleDateString()}</p>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <h3 className={`font-semibold ${achievement.earned ? 'text-foreground' : 'text-muted-foreground'
-                          }`}>
-                          {achievement.name}
-                        </h3>
-                      </div>
-                      {achievement.earned && (
-                        <Badge variant="secondary" className="bg-primary/10 text-primary text-xs">
-                          Earned
-                        </Badge>
-                      )}
+                      <p className="text-sm text-muted-foreground">{item.badge.description}</p>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {achievement.description}
-                    </p>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
