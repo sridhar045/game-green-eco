@@ -98,14 +98,21 @@ export default function Profile() {
   console.log(currentLevel,'level');
   
 
-  const achievements = [
-    { id: 1, name: "Climate Champion", description: "Completed 10 climate lessons", icon: Award, earned: (profile.completed_lessons || 0) >= 10 },
-    { id: 2, name: "Mission Leader", description: "Led 3 community missions", icon: Star, earned: (profile.completed_missions || 0) >= 3 },
-    { id: 3, name: "Eco Warrior", description: "Earned 1000 points", icon: Trophy, earned: (profile.eco_points || 0) >= 1000 },
-    { id: 4, name: "Tree Hugger", description: "Planted 10 trees", icon: TreePine, earned: false },
-    { id: 5, name: "Green Guardian", description: "Complete 20 missions", icon: Leaf, earned: (profile.completed_missions || 0) >= 20 },
-    { id: 6, name: "Sustainability Expert", description: "Master all lesson categories", icon: Award, earned: false }
-  ]
+  const [earnedBadges, setEarnedBadges] = useState<Array<{ id: string; earned_at: string; badge: { name: string; description: string; image_url: string } }>>([])
+
+  useEffect(() => {
+    async function fetchEarnedBadges() {
+      if (!profile) return
+      const { data } = await supabase
+        .from('user_badges')
+        .select(`id, earned_at, badges:badge_id ( name, description, image_url )`)
+        .eq('user_id', profile.user_id)
+        .order('earned_at', { ascending: false })
+      const mapped = (data || []).map((ub: any) => ({ id: ub.id, earned_at: ub.earned_at, badge: ub.badges }))
+      setEarnedBadges(mapped)
+    }
+    fetchEarnedBadges()
+  }, [profile])
 
   const studentStats = [
     { label: "Total Points", value: profile?.eco_points || 0, info: '', max: pointsForNextLevel },

@@ -6,6 +6,8 @@ import { Trophy, Medal, Award, MapPin, Users, TreePine } from "lucide-react"
 import { useLeaderboardData } from "@/hooks/useLeaderboardData"
 import { useStudentLeaderboard } from "@/hooks/useStudentLeaderboard"
 import { useProfile } from "@/hooks/useProfile"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState } from "react"
 
 interface LeaderboardModalProps {
   isOpen: boolean
@@ -14,8 +16,9 @@ interface LeaderboardModalProps {
 
 export function LeaderboardModal({ isOpen, onClose }: LeaderboardModalProps) {
   const { profile } = useProfile()
+  const [scope, setScope] = useState<'organization' | 'district' | 'state' | 'country'>('district')
   const orgLeaderboard = useLeaderboardData()
-  const studentLeaderboard = useStudentLeaderboard()
+  const studentLeaderboard = useStudentLeaderboard(scope)
   
   // Use student leaderboard for students, organization leaderboard for organizations
   const isStudentView = profile?.role === 'student'
@@ -83,6 +86,23 @@ export function LeaderboardModal({ isOpen, onClose }: LeaderboardModalProps) {
               : 'See how organizations across different regions are making an environmental impact'
             }
           </p>
+
+          {isStudentView && (
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-sm text-muted-foreground">Scope:</span>
+              <Select value={scope} onValueChange={(v) => setScope(v as any)}>
+                <SelectTrigger className="w-56">
+                  <SelectValue placeholder="Select scope" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="organization">Organization</SelectItem>
+                  <SelectItem value="district">District</SelectItem>
+                  <SelectItem value="state">State</SelectItem>
+                  <SelectItem value="country">Country</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* User's Position */}
           {userRank && (

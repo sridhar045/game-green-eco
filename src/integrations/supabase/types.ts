@@ -485,6 +485,22 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_student_leaderboard_by_scope: {
+        Args: { scope: string }
+        Returns: {
+          completed_lessons: number
+          completed_missions: number
+          display_name: string
+          eco_points: number
+          level: number
+          organization_code: string
+          organization_name: string
+          region_country: string
+          region_district: string
+          region_state: string
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

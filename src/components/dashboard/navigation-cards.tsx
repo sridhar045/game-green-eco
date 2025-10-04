@@ -24,15 +24,6 @@ export function NavigationCards() {
       bgColor: "bg-accent/5",
       route: "/missions",
       buttonText: "View Missions"
-    },
-    {
-      title: "Your Profile",
-      description: "Track your progress, view achievements, and customize your eco-learning journey.",
-      icon: User,
-      color: "text-eco-sun",
-      bgColor: "bg-eco-sun/5",
-      route: "/profile",
-      buttonText: "View Profile"
     }
   ]
 

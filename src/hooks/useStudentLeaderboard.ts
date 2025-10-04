@@ -19,7 +19,7 @@ interface StudentRank extends StudentLeaderboardEntry {
   rank: number
 }
 
-export function useStudentLeaderboard() {
+export function useStudentLeaderboard(scope: 'organization' | 'district' | 'state' | 'country' = 'district') {
   const { user } = useAuth()
   const { profile } = useProfile()
   const [leaderboardData, setLeaderboardData] = useState<StudentLeaderboardEntry[]>([])
@@ -34,9 +34,9 @@ export function useStudentLeaderboard() {
           return
         }
 
-        // Fetch leaderboard via secured RPC to respect RLS while scoping by your region
+        // Fetch leaderboard via secured RPC with explicit scope
         const { data: students, error } = await supabase
-          .rpc('get_student_leaderboard') as any
+          .rpc('get_student_leaderboard_by_scope', { scope }) as any
 
         if (error) {
           console.error('Error fetching student leaderboard:', error)
@@ -56,6 +56,8 @@ export function useStudentLeaderboard() {
               ...(students[userIndex] as StudentLeaderboardEntry),
               rank: userIndex + 1
             })
+          } else {
+            setUserRank(null)
           }
         }
       } catch (error) {
@@ -66,7 +68,7 @@ export function useStudentLeaderboard() {
     }
 
     fetchStudentLeaderboard()
-  }, [profile, user])
+  }, [profile, user, scope])
 
   return { leaderboardData, userRank, loading }
 }

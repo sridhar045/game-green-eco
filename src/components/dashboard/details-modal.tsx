@@ -51,32 +51,47 @@ export function DetailsModal({ isOpen, onClose, type, data }: DetailsModalProps)
       case 'lessons':
         return (
           <div className="space-y-4">
-            {data.map((lesson, index) => (
-              <Card key={lesson.id || index}>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-medium mb-1">{lesson.title}</h3>
-                      <p className="text-sm text-muted-foreground mb-2">{lesson.description}</p>
-                      <div className="flex items-center gap-4 text-sm">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          <span>{new Date(lesson.completed_at).toLocaleDateString()}</span>
+            {data.map((lesson, index) => {
+              const l = (lesson as any).lessons || lesson
+              const completedAt = (lesson as any).completed_at
+              const progressPct = (lesson as any).progress_percentage ?? 100
+              const difficulty = l?.difficulty
+              const duration = l?.duration_minutes
+              return (
+                <Card key={(lesson as any).id || index}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-medium mb-1">{l?.title}</h3>
+                        <p className="text-sm text-muted-foreground mb-2">{l?.description}</p>
+                        <div className="flex flex-wrap items-center gap-4 text-sm">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            <span>{completedAt ? new Date(completedAt).toLocaleDateString() : '-'}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            <span>{duration} min</span>
+                          </div>
+                          {difficulty && (
+                            <Badge variant="outline" className="capitalize">{difficulty}</Badge>
+                          )}
+                          <div className="flex items-center gap-1 text-primary font-semibold">
+                            <Target className="h-4 w-4" />
+                            <span>25 eco-points</span>
+                          </div>
+                          <Badge variant="secondary" className="capitalize">Completed</Badge>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          <span>{lesson.duration_minutes} min</span>
+                        <div className="mt-2">
+                          <Progress value={progressPct} className="h-2" />
                         </div>
                       </div>
-                      <div className="mt-2">
-                        <Progress value={lesson.progress_percentage || 100} className="h-2" />
-                      </div>
+                      <CheckCircle className="h-5 w-5 text-green-500 ml-4" />
                     </div>
-                    <CheckCircle className="h-5 w-5 text-green-500 ml-4" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         )
 

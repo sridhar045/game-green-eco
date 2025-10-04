@@ -164,6 +164,30 @@ export function MissionReviewModal({ isOpen, onClose }: MissionReviewModalProps)
                         )}
                       </div>
                     )}
+
+                    {Array.isArray(submission.submission_files) && submission.submission_files.length > 0 && (
+                      <div className="space-y-3">
+                        <p className="font-medium">Submitted Files:</p>
+                        <div className="space-y-2">
+                          {submission.submission_files.map((fileUrl: string, idx: number) => {
+                            const isDirectVideo = /\.(mp4|webm|ogg)$/i.test(fileUrl)
+                            return (
+                              <div key={idx} className="bg-muted/50 p-3 rounded-md">
+                                {isDirectVideo ? (
+                                  <video controls className="w-full rounded-md" src={fileUrl}>
+                                    Your browser does not support video playback.
+                                  </video>
+                                ) : (
+                                  <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm">
+                                    {fileUrl}
+                                  </a>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
                     
                     {selectedSubmission === submission.id ? (
                       <div className="space-y-4 border-t pt-4">
