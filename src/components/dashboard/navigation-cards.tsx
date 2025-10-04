@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { EcoButton } from "@/components/ui/eco-button"
-import { BookOpen, Target, User, Leaf, ArrowRight } from "lucide-react"
+import { BookOpen, Target, Award, ArrowRight } from "lucide-react"
 
 export function NavigationCards() {
   const navigate = useNavigate()
@@ -24,6 +24,15 @@ export function NavigationCards() {
       bgColor: "bg-accent/5",
       route: "/missions",
       buttonText: "View Missions"
+    },
+    {
+      title: "Available Badges",
+      description: "Discover all badges you can earn by completing lessons and missions.",
+      icon: Award,
+      color: "text-eco-sun",
+      bgColor: "bg-eco-sun/5",
+      route: "/badges",
+      buttonText: "View Badges"
     }
   ]
 

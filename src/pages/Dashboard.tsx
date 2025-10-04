@@ -6,8 +6,8 @@ import { OrganizationCodeWelcome } from "@/components/dashboard/OrganizationCode
 import { InProgressSection } from "@/components/dashboard/InProgressSection"
 import { useProfile } from "@/hooks/useProfile"
 import { useState, useEffect, useRef } from "react"
-import { AvailableBadges } from "@/components/dashboard/AvailableBadges"
 import { EcoCelebrations } from "@/components/ui/eco-celebrations"
+
 export default function Dashboard() {
   const { profile } = useProfile()
   const [showOrgCodeWelcome, setShowOrgCodeWelcome] = useState(false)
@@ -78,9 +78,6 @@ export default function Dashboard() {
 
         {/* Navigation Cards */}
         <NavigationCards />
-
-        {/* Available Badges Section */}
-        <AvailableBadges />
       </div>
     </div>
   )

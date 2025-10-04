@@ -14,6 +14,7 @@ import LessonPlayer from "./pages/LessonPlayer";
 import Missions from "./pages/Missions";
 import MissionSubmission from "./pages/MissionSubmission";
 import Profile from "./pages/Profile";
+import AvailableBadgesPage from "./pages/AvailableBadgesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -57,6 +58,11 @@ const App = () => (
             <Route path="/profile" element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/badges" element={
+              <ProtectedRoute>
+                <AvailableBadgesPage />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
