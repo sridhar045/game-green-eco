@@ -36,11 +36,16 @@ export function MissionVideoReviewModal({
       }
 
       try {
-        // If it's a storage path, get the signed URL
-        if (submission.video_url.startsWith('mission-videos/')) {
+        const isHttp = typeof submission.video_url === 'string' && /^https?:\/\//i.test(submission.video_url)
+        if (isHttp) {
+          // Direct URL (already accessible)
+          setVideoUrl(submission.video_url)
+        } else {
+          // Treat as storage path within mission-videos bucket
+          const path = submission.video_url as string
           const { data, error } = await supabase.storage
             .from('mission-videos')
-            .createSignedUrl(submission.video_url, 3600) // 1 hour expiry
+            .createSignedUrl(path, 3600) // 1 hour expiry
 
           if (error) {
             console.error('Error getting signed URL:', error)
@@ -49,9 +54,6 @@ export function MissionVideoReviewModal({
           } else {
             setVideoUrl(data.signedUrl)
           }
-        } else {
-          // Direct URL
-          setVideoUrl(submission.video_url)
         }
       } catch (error) {
         console.error('Error loading video:', error)
