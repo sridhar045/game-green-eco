@@ -61,6 +61,20 @@ export function useProfile() {
             fetchedOrgName = orgData?.organization_name || data.organization_code
           }
 
+          // Count actual completed lessons (100% progress)
+          const { count: lessonsCount } = await supabase
+            .from('lesson_progress')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('progress_percentage', 100)
+
+          // Count actual approved missions
+          const { count: missionsCount } = await supabase
+            .from('mission_submissions')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('status', 'approved')
+
           setProfile({
             id: data.id,
             email: user.email || '',
@@ -69,8 +83,8 @@ export function useProfile() {
             avatar_url: data.avatar_url,
             eco_points: data.eco_points,
             level: data.level,
-            completed_lessons: data.completed_lessons,
-            completed_missions: data.completed_missions,
+            completed_lessons: lessonsCount || 0,
+            completed_missions: missionsCount || 0,
             streak_days: data.streak_days,
             organization_name: data.organization_name,
             organization_code: data.organization_code,

@@ -2,13 +2,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EcoButton } from "@/components/ui/eco-button"
-import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { CheckCircle, XCircle, User, Calendar, FileText } from "lucide-react"
+import { User, Calendar, FileText } from "lucide-react"
 import { useMissionReview } from "@/hooks/useMissionReview"
 import { useState } from "react"
 import { toast } from "sonner"
+import { MissionVideoReviewModal } from "./MissionVideoReviewModal"
 
 interface MissionReviewModalProps {
   isOpen: boolean
@@ -17,35 +15,26 @@ interface MissionReviewModalProps {
 
 export function MissionReviewModal({ isOpen, onClose }: MissionReviewModalProps) {
   const { submissions, loading, approveSubmission, rejectSubmission } = useMissionReview()
-  const [selectedSubmission, setSelectedSubmission] = useState<string | null>(null)
-  const [rejectReason, setRejectReason] = useState("")
-  const [approvalPoints, setApprovalPoints] = useState("")
+  const [reviewingSubmission, setReviewingSubmission] = useState<any>(null)
 
-  const handleApprove = async (submissionId: string, missionPoints: number) => {
-    const points = parseInt(approvalPoints) || missionPoints
+  const handleApprove = async (submissionId: string, points: number) => {
     const success = await approveSubmission(submissionId, points)
     if (success) {
       toast.success("Mission approved successfully!")
-      setSelectedSubmission(null)
-      setApprovalPoints("")
     } else {
       toast.error("Failed to approve mission")
     }
+    return success
   }
 
-  const handleReject = async (submissionId: string) => {
-    if (!rejectReason.trim()) {
-      toast.error("Please provide a reason for rejection")
-      return
-    }
-    const success = await rejectSubmission(submissionId, rejectReason)
+  const handleReject = async (submissionId: string, reason: string) => {
+    const success = await rejectSubmission(submissionId, reason)
     if (success) {
       toast.success("Mission rejected")
-      setSelectedSubmission(null)
-      setRejectReason("")
     } else {
       toast.error("Failed to reject mission")
     }
+    return success
   }
 
   if (loading) {
@@ -67,6 +56,7 @@ export function MissionReviewModal({ isOpen, onClose }: MissionReviewModalProps)
   }
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" aria-describedby="mission-review-description">
         <DialogHeader>
@@ -189,67 +179,13 @@ export function MissionReviewModal({ isOpen, onClose }: MissionReviewModalProps)
                       </div>
                     )}
                     
-                    {selectedSubmission === submission.id ? (
-                      <div className="space-y-4 border-t pt-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="points">Award Points</Label>
-                            <Input
-                              id="points"
-                              type="number"
-                              placeholder={`Default: ${submission.mission?.points}`}
-                              value={approvalPoints}
-                              onChange={(e) => setApprovalPoints(e.target.value)}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="reason">Rejection Reason (if rejecting)</Label>
-                            <Textarea
-                              id="reason"
-                              placeholder="Provide reason for rejection..."
-                              value={rejectReason}
-                              onChange={(e) => setRejectReason(e.target.value)}
-                            />
-                          </div>
-                        </div>
-                        
-                        <div className="flex gap-2">
-                          <EcoButton
-                            onClick={() => handleApprove(submission.id, submission.mission?.points || 0)}
-                            className="flex-1"
-                          >
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Approve
-                          </EcoButton>
-                          <EcoButton
-                            variant="outline"
-                            onClick={() => handleReject(submission.id)}
-                            className="flex-1"
-                          >
-                            <XCircle className="h-4 w-4 mr-2" />
-                            Reject
-                          </EcoButton>
-                          <EcoButton
-                            variant="ghost"
-                            onClick={() => {
-                              setSelectedSubmission(null)
-                              setRejectReason("")
-                              setApprovalPoints("")
-                            }}
-                          >
-                            Cancel
-                          </EcoButton>
-                        </div>
-                      </div>
-                    ) : (
-                      <EcoButton
-                        onClick={() => setSelectedSubmission(submission.id)}
-                        variant="outline"
-                        className="w-full"
-                      >
-                        Review Submission
-                      </EcoButton>
-                    )}
+                    <EcoButton
+                      onClick={() => setReviewingSubmission(submission)}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      Review Submission
+                    </EcoButton>
                   </CardContent>
                 </Card>
               ))}
@@ -258,5 +194,16 @@ export function MissionReviewModal({ isOpen, onClose }: MissionReviewModalProps)
         </div>
       </DialogContent>
     </Dialog>
+    
+    {reviewingSubmission && (
+      <MissionVideoReviewModal
+        isOpen={!!reviewingSubmission}
+        onClose={() => setReviewingSubmission(null)}
+        submission={reviewingSubmission}
+        onApprove={handleApprove}
+        onReject={handleReject}
+      />
+    )}
+  </>
   )
 }

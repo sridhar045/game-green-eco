@@ -1,11 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EcoButton } from "@/components/ui/eco-button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { ArrowLeft, Upload, Send } from "lucide-react"
+import { ArrowLeft, Upload, Send, Video } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/contexts/AuthContext"
 import { toast } from "sonner"
@@ -23,6 +23,9 @@ export default function MissionSubmission() {
   })
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [videoFile, setVideoFile] = useState<File | null>(null)
+  const [videoPreview, setVideoPreview] = useState<string | null>(null)
+  const videoInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (id && user) {
@@ -72,16 +75,59 @@ export default function MissionSubmission() {
     }
   }
 
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('video/')) {
+      toast.error('Please select a valid video file')
+      return
+    }
+
+    // Validate file size (max 100MB)
+    if (file.size > 100 * 1024 * 1024) {
+      toast.error('Video file size must be less than 100MB')
+      return
+    }
+
+    setVideoFile(file)
+    setVideoPreview(URL.createObjectURL(file))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user || !id) return
 
     setSubmitting(true)
     try {
+      let videoUrl = null
+
+      // Upload video if provided
+      if (videoFile) {
+        const fileExt = videoFile.name.split('.').pop()
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`
+        
+        const { error: uploadError, data: uploadData } = await supabase.storage
+          .from('mission-videos')
+          .upload(fileName, videoFile, {
+            cacheControl: '3600',
+            upsert: false
+          })
+
+        if (uploadError) {
+          console.error('Error uploading video:', uploadError)
+          toast.error("Failed to upload video")
+          setSubmitting(false)
+          return
+        }
+
+        videoUrl = uploadData.path
+      }
+
       const submissionData = {
         description: formData.description,
         notes: formData.notes,
-        images: [], // In a real app, this would include uploaded images
         completedDate: new Date().toISOString()
       }
 
@@ -93,6 +139,7 @@ export default function MissionSubmission() {
           status: 'submitted',
           submission_data: submissionData,
           submission_files: formData.files,
+          video_url: videoUrl,
           submitted_at: new Date().toISOString()
         })
         .select()
@@ -250,15 +297,50 @@ export default function MissionSubmission() {
                 </div>
 
                 <div>
-                  <Label>Upload Photos/Documents</Label>
-                  <div className="mt-2 border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
-                    <Upload className="h-8 w-8 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Drag and drop files here or click to browse
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      (This is a demo - file upload functionality would be implemented with Supabase Storage)
-                    </p>
+                  <Label htmlFor="video-upload">Upload Video Proof (Optional)</Label>
+                  <input
+                    ref={videoInputRef}
+                    id="video-upload"
+                    type="file"
+                    accept="video/mp4,video/webm,video/quicktime"
+                    onChange={handleVideoChange}
+                    className="hidden"
+                  />
+                  <div 
+                    className="mt-2 border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                    onClick={() => videoInputRef.current?.click()}
+                  >
+                    {videoPreview ? (
+                      <div className="space-y-4">
+                        <video 
+                          src={videoPreview} 
+                          controls 
+                          className="w-full max-h-64 rounded-md mx-auto"
+                        />
+                        <EcoButton
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setVideoFile(null)
+                            setVideoPreview(null)
+                          }}
+                        >
+                          Remove Video
+                        </EcoButton>
+                      </div>
+                    ) : (
+                      <>
+                        <Video className="h-8 w-8 mx-auto mb-4 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Click to upload a video (MP4, WebM, MOV)
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Maximum file size: 100MB
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
 

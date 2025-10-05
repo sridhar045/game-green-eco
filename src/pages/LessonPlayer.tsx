@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EcoButton } from "@/components/ui/eco-button"
@@ -23,6 +23,8 @@ export default function LessonPlayer() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user } = useAuth()
+  const [searchParams] = useSearchParams()
+  const isRetake = searchParams.get('retake') === 'true'
   const [lesson, setLesson] = useState<any>(null)
   const [progress, setProgress] = useState(0)
   const [currentStage, setCurrentStage] = useState<LessonStage>(LessonStage.VIDEO)
@@ -131,7 +133,7 @@ export default function LessonPlayer() {
   }
 
   const updateProgress = async (newProgress: number, completed: boolean = false) => {
-    if (!user || !id) return
+    if (!user || !id || isRetake) return // Don't update progress when retaking
 
     try {
       const validProgress = Math.max(0, Math.min(100, Math.round(newProgress)))
@@ -169,6 +171,13 @@ export default function LessonPlayer() {
 
   const handleVideoComplete = () => {
     setVideoProgress(100)
+    
+    // If retaking, return to lessons page after video
+    if (isRetake) {
+      setTimeout(() => navigate('/lessons'), 1500)
+      return
+    }
+    
     setProgress(33) // 33% for video completion
     updateProgress(33)
     setCurrentStage(LessonStage.QUIZ)
@@ -227,7 +236,7 @@ export default function LessonPlayer() {
           <VideoPlayer
             videoUrl={sampleVideoUrl}
             onVideoComplete={handleVideoComplete}
-            onProgressUpdate={handleVideoProgress}
+            onProgressUpdate={isRetake ? () => {} : handleVideoProgress}
             duration={lesson?.duration_minutes || 10}
             userId={user?.id}
             lessonId={id}

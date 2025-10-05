@@ -2,7 +2,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { CheckCircle, BookOpen, Target, Award, Calendar, Clock } from "lucide-react"
+import { EcoButton } from "@/components/ui/eco-button"
+import { CheckCircle, BookOpen, Target, Award, Calendar, Clock, RotateCcw } from "lucide-react"
+import { LessonRetakeModal } from "@/components/lesson/LessonRetakeModal"
+import { useLessonDetails } from "@/hooks/useLessonDetails"
+import { useState } from "react"
 
 interface DetailsModalProps {
   isOpen: boolean
@@ -12,6 +16,9 @@ interface DetailsModalProps {
 }
 
 export function DetailsModal({ isOpen, onClose, type, data }: DetailsModalProps) {
+  const [retakeModalOpen, setRetakeModalOpen] = useState(false)
+  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null)
+  const { lesson, quizScore, missions, loading: detailsLoading } = useLessonDetails(selectedLessonId || '')
   const getModalTitle = () => {
     switch (type) {
       case 'lessons':
@@ -86,7 +93,22 @@ export function DetailsModal({ isOpen, onClose, type, data }: DetailsModalProps)
                           <Progress value={progressPct} className="h-2" />
                         </div>
                       </div>
-                      <CheckCircle className="h-5 w-5 text-green-500 ml-4" />
+                      <div className="flex flex-col items-end gap-2 ml-4">
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                        <EcoButton
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const lessonObj = (lesson as any).lessons || lesson
+                            setSelectedLessonId(lessonObj?.id)
+                            setRetakeModalOpen(true)
+                          }}
+                          className="flex items-center gap-1"
+                        >
+                          <RotateCcw className="h-3 w-3" />
+                          Replay
+                        </EcoButton>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -169,18 +191,33 @@ export function DetailsModal({ isOpen, onClose, type, data }: DetailsModalProps)
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" aria-describedby="details-modal-description">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            {getIcon()}
-            {getModalTitle()}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="mt-4">
-          {renderContent()}
-        </div>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" aria-describedby="details-modal-description">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {getIcon()}
+              {getModalTitle()}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            {renderContent()}
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {lesson && !detailsLoading && (
+        <LessonRetakeModal
+          isOpen={retakeModalOpen}
+          onClose={() => {
+            setRetakeModalOpen(false)
+            setSelectedLessonId(null)
+          }}
+          lesson={lesson}
+          quizScore={quizScore}
+          missions={missions}
+        />
+      )}
+    </>
   )
 }

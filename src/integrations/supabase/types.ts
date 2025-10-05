@@ -226,6 +226,7 @@ export type Database = {
           submitted_at: string | null
           updated_at: string
           user_id: string
+          video_url: string | null
         }
         Insert: {
           completion_count?: number | null
@@ -242,6 +243,7 @@ export type Database = {
           submitted_at?: string | null
           updated_at?: string
           user_id: string
+          video_url?: string | null
         }
         Update: {
           completion_count?: number | null
@@ -258,6 +260,7 @@ export type Database = {
           submitted_at?: string | null
           updated_at?: string
           user_id?: string
+          video_url?: string | null
         }
         Relationships: [
           {
