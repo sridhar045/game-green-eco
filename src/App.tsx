@@ -8,7 +8,9 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Dashboard from "./pages/Dashboard";
+import RoleRedirect from "./pages/RoleRedirect";
+import StudentDashboard from "./pages/student/StudentDashboard";
+import OrgDashboard from "./pages/org/OrgDashboard";
 import Lessons from "./pages/Lessons";
 import LessonPlayer from "./pages/LessonPlayer";
 import Missions from "./pages/Missions";
@@ -32,7 +34,17 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
-                <Dashboard />
+                <RoleRedirect />
+              </ProtectedRoute>
+            } />
+            <Route path="/student/dashboard" element={
+              <ProtectedRoute>
+                <StudentDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/org/dashboard" element={
+              <ProtectedRoute>
+                <OrgDashboard />
               </ProtectedRoute>
             } />
             <Route path="/lessons" element={

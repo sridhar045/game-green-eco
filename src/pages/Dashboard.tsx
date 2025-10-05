@@ -33,17 +33,7 @@ export default function Dashboard() {
     setShowOrgCodeWelcome(false)
   }
 
-  // Show organization dashboard for organization users
-  if (profile?.role === 'organization') {
-    return (
-      <>
-        <OrganizationDashboard />
-        {showOrgCodeWelcome && (
-          <OrganizationCodeWelcome onClose={handleCloseOrgWelcome} />
-        )}
-      </>
-    )
-  }
+  const isOrg = profile?.role === 'organization'
 
   // Detect point/level gains for animations
   useEffect(() => {
@@ -66,19 +56,21 @@ export default function Dashboard() {
         levelTo={levelChange?.to}
         onDone={() => { setPointsGain(null); setLevelChange(null); }}
       />
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* User Header */}
-        <UserHeader />
-
-        {/* Dashboard Stats */}
-        <DashboardStats />
-
-        {/* In Progress Section */}
-        <InProgressSection />
-
-        {/* Navigation Cards */}
-        <NavigationCards />
-      </div>
+      {isOrg ? (
+        <>
+          <OrganizationDashboard />
+          {showOrgCodeWelcome && (
+            <OrganizationCodeWelcome onClose={handleCloseOrgWelcome} />
+          )}
+        </>
+      ) : (
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <UserHeader />
+          <DashboardStats />
+          <InProgressSection />
+          <NavigationCards />
+        </div>
+      )}
     </div>
   )
 }

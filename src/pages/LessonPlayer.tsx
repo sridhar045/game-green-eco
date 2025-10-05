@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress"
 import { ArrowLeft, BookOpen, Award, Target } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/contexts/AuthContext"
-import { toast } from "sonner"
+// import { toast } from "sonner"
 import { VideoPlayer } from "@/components/lesson/VideoPlayer"
 import { LessonQuiz } from "@/components/lesson/LessonQuiz"
 import { LessonMissions } from "@/components/lesson/LessonMissions"
@@ -160,7 +160,6 @@ export default function LessonPlayer() {
       } else {
         setProgress(validProgress)
         if (completed) {
-          toast.success("🎉 Lesson Completed! Well done!", { duration: 4000, className: "animate-enter" })
           setCurrentStage(LessonStage.COMPLETED)
         }
       }
@@ -174,7 +173,6 @@ export default function LessonPlayer() {
     setProgress(33) // 33% for video completion
     updateProgress(33)
     setCurrentStage(LessonStage.QUIZ)
-    toast.success("Video completed! Time for the quiz.")
   }
 
   const handleVideoProgress = (progress: number) => {
@@ -193,19 +191,12 @@ export default function LessonPlayer() {
       setProgress(finalProgress)
       updateProgress(finalProgress, true)
       setCurrentStage(LessonStage.COMPLETED)
-      toast.success(`Great job! You scored ${score}%. Lesson completed!`)
     } else {
       // Has missions, move to missions stage
       const quizProgressWeight = 67
       setProgress(quizProgressWeight)
       updateProgress(quizProgressWeight)
       setCurrentStage(LessonStage.MISSIONS)
-      
-      if (score >= 70) {
-        toast.success(`🌟 Quiz Passed! You scored ${score}%. Ready for missions!`, { duration: 3000, className: "animate-scale-in" })
-      } else {
-        toast.info(`You scored ${score}%. You can still proceed to missions!`)
-      }
     }
   }
 

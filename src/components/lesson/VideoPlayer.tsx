@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { EcoButton } from '@/components/ui/eco-button'
-import { Progress } from '@/components/ui/progress'
+import { Slider } from '@/components/ui/slider'
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Maximize } from 'lucide-react'
-import { toast } from 'sonner'
 
 interface VideoPlayerProps {
   videoUrl?: string
@@ -23,47 +22,47 @@ export function VideoPlayer({ videoUrl, onVideoComplete, onProgressUpdate, durat
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [videoProgress, setVideoProgress] = useState(0)
 
+  const storageKey = `video_progress_${userId || 'anon'}_${lessonId || videoUrl || 'unknown'}`
+
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
 
     const updateTime = () => {
       setCurrentTime(video.currentTime)
-      const progress = (video.currentTime / video.duration) * 100
+      const progress = video.duration ? (video.currentTime / video.duration) * 100 : 0
       setVideoProgress(progress)
       onProgressUpdate(progress)
-      
       // Save video progress to localStorage for resume functionality
-      const storageKey = `video_progress_${userId || 'anon'}_${lessonId || videoUrl || 'unknown'}`
       localStorage.setItem(storageKey, video.currentTime.toString())
     }
 
     const handleEnded = () => {
       setIsPlaying(false)
       onVideoComplete()
-      toast.success("Video completed! Ready for quiz.")
     }
 
-    video.addEventListener('timeupdate', updateTime)
-    video.addEventListener('ended', handleEnded)
-    video.addEventListener('loadedmetadata', () => {
-      // Resume from saved progress if available
-      if (videoUrl) {
-        const savedProgress = localStorage.getItem(`video_progress_${videoUrl}`)
-        if (savedProgress) {
-          const savedTime = parseFloat(savedProgress)
+    const handleLoaded = () => {
+      const saved = localStorage.getItem(storageKey)
+      if (saved) {
+        const savedTime = parseFloat(saved)
+        if (!isNaN(savedTime)) {
           video.currentTime = savedTime
           setCurrentTime(savedTime)
         }
       }
-    })
+    }
+
+    video.addEventListener('timeupdate', updateTime)
+    video.addEventListener('ended', handleEnded)
+    video.addEventListener('loadedmetadata', handleLoaded)
 
     return () => {
       video.removeEventListener('timeupdate', updateTime)
       video.removeEventListener('ended', handleEnded)
-      video.removeEventListener('loadedmetadata', () => {})
+      video.removeEventListener('loadedmetadata', handleLoaded)
     }
-  }, [onVideoComplete, onProgressUpdate])
+  }, [onVideoComplete, onProgressUpdate, storageKey, videoUrl])
 
   const togglePlay = () => {
     const video = videoRef.current
@@ -169,18 +168,12 @@ export function VideoPlayer({ videoUrl, onVideoComplete, onProgressUpdate, durat
                 </EcoButton>
                 
                 <div className="flex-1 mx-4">
-                  <Progress 
-                    value={videoProgress} 
-                    className="h-1 cursor-pointer" 
-                    onClick={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect()
-                      const percent = ((e.clientX - rect.left) / rect.width) * 100
-                      handleSeek([percent])
-                      // Simulate video completion when reaching end
-                      if (percent >= 95) {
-                        setTimeout(onVideoComplete, 1000)
-                      }
-                    }}
+                  <Slider
+                    value={[videoProgress]}
+                    max={100}
+                    step={0.1}
+                    onValueChange={handleSeek}
+                    className="cursor-pointer"
                   />
                 </div>
                 
@@ -257,9 +250,12 @@ export function VideoPlayer({ videoUrl, onVideoComplete, onProgressUpdate, durat
               </EcoButton>
               
               <div className="flex-1 mx-4">
-                <Progress 
-                  value={videoProgress} 
-                  className="h-1 cursor-pointer"
+                <Slider
+                  value={[videoProgress]}
+                  max={100}
+                  step={0.1}
+                  onValueChange={handleSeek}
+                  className="cursor-pointer"
                 />
               </div>
               
