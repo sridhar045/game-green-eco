@@ -101,9 +101,10 @@ export default function Profile() {
 
   const [earnedBadges, setEarnedBadges] = useState<Array<{ id: string; earned_at: string; badge: { name: string; description: string; image_url: string } }>>([])
 
+  // Fetch earned badges (only conditionally when not org)
   useEffect(() => {
     async function fetchEarnedBadges() {
-      if (!profile || !user) return
+      if (!profile || !user || isOrganization) return
       const { data } = await supabase
         .from('user_badges')
         .select(`id, earned_at, badges:badge_id ( name, description, image_url )`)
@@ -113,7 +114,7 @@ export default function Profile() {
       setEarnedBadges(mapped)
     }
     fetchEarnedBadges()
-  }, [profile, user])
+  }, [profile, user, isOrganization])
 
   const studentStats = [
     { label: "Total Points", value: profile?.eco_points || 0, info: '', max: pointsForNextLevel },

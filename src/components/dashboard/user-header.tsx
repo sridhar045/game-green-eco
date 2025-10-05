@@ -73,7 +73,7 @@ export function UserHeader() {
           <div className="flex items-center gap-2">
             <EcoButton
               variant="outline"
-              onClick={() => navigate("/profile")}
+              onClick={() => navigate("/student/profile")}
               className="flex items-center gap-2"
             >
               <User className="h-4 w-4" />

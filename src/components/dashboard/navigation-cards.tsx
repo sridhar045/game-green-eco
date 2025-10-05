@@ -13,7 +13,7 @@ export function NavigationCards() {
       icon: BookOpen,
       color: "text-primary",
       bgColor: "bg-primary/5",
-      route: "/lessons",
+      route: "/student/lessons",
       buttonText: "Start Learning"
     },
     {
@@ -22,7 +22,7 @@ export function NavigationCards() {
       icon: Target,
       color: "text-accent",
       bgColor: "bg-accent/5",
-      route: "/missions",
+      route: "/student/missions",
       buttonText: "View Missions"
     },
     {
@@ -31,7 +31,7 @@ export function NavigationCards() {
       icon: Award,
       color: "text-eco-sun",
       bgColor: "bg-eco-sun/5",
-      route: "/badges",
+      route: "/student/badges",
       buttonText: "View Badges"
     }
   ]

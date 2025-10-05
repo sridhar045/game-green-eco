@@ -46,7 +46,7 @@ export default function AvailableBadgesPage() {
         <div className="flex items-center justify-between mb-8">
           <EcoButton
             variant="ghost"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/student/dashboard")}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />

@@ -47,6 +47,37 @@ const App = () => (
                 <OrgDashboard />
               </ProtectedRoute>
             } />
+            <Route path="/student/lessons" element={
+              <ProtectedRoute>
+                <Lessons />
+              </ProtectedRoute>
+            } />
+            <Route path="/student/lesson/:id" element={
+              <ProtectedRoute>
+                <LessonPlayer />
+              </ProtectedRoute>
+            } />
+            <Route path="/student/missions" element={
+              <ProtectedRoute>
+                <Missions />
+              </ProtectedRoute>
+            } />
+            <Route path="/student/mission/:id/submit" element={
+              <ProtectedRoute>
+                <MissionSubmission />
+              </ProtectedRoute>
+            } />
+            <Route path="/student/profile" element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/student/badges" element={
+              <ProtectedRoute>
+                <AvailableBadgesPage />
+              </ProtectedRoute>
+            } />
+            {/* Legacy routes - redirect to new structure */}
             <Route path="/lessons" element={
               <ProtectedRoute>
                 <Lessons />

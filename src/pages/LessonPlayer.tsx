@@ -99,7 +99,6 @@ export default function LessonPlayer() {
 
       if (lessonError) {
         console.error('Error fetching lesson:', lessonError)
-        toast.error("Failed to load lesson")
         return
       }
 
@@ -258,7 +257,6 @@ export default function LessonPlayer() {
                     variant="outline"
                     onClick={() => {
                       updateProgress(100, true)
-                      toast.success("Lesson marked as complete!")
                       setTimeout(() => navigate('/lessons'), 1000)
                     }}
                   >
