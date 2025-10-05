@@ -83,6 +83,24 @@ export default function Profile() {
 
   }, [orgStats.totalMissions, orgStats.totalStudents, profile])
 
+  const [earnedBadges, setEarnedBadges] = useState<Array<{ id: string; earned_at: string; badge: { name: string; description: string; image_url: string } }>>([])
+
+  useEffect(() => {
+    async function fetchEarnedBadges() {
+      const isOrg = profile?.role === 'organization'
+      if (!profile || !user || isOrg) return
+      const { data } = await supabase
+        .from('user_badges')
+        .select(`id, earned_at, badges:badge_id ( name, description, image_url )`)
+        .eq('user_id', user.id)
+        .order('earned_at', { ascending: false })
+      const mapped = (data || []).map((ub: any) => ({ id: ub.id, earned_at: ub.earned_at, badge: ub.badges }))
+      setEarnedBadges(mapped)
+    }
+    fetchEarnedBadges()
+  }, [profile, user])
+
+  // Guard after all hooks to avoid hook order issues
   if (!profile) return null
 
   const isOrganization = profile.role === 'organization'
@@ -97,24 +115,6 @@ export default function Profile() {
   const pointsNeededForNextLevel = pointsForNextLevel - pointsForCurrentLevel
   const levelProgress = Math.min(100, Math.round((pointsInCurrentLevel / pointsNeededForNextLevel) * 100))
   console.log(currentLevel,'level');
-  
-
-  const [earnedBadges, setEarnedBadges] = useState<Array<{ id: string; earned_at: string; badge: { name: string; description: string; image_url: string } }>>([])
-
-  // Fetch earned badges (only conditionally when not org)
-  useEffect(() => {
-    async function fetchEarnedBadges() {
-      if (!profile || !user || isOrganization) return
-      const { data } = await supabase
-        .from('user_badges')
-        .select(`id, earned_at, badges:badge_id ( name, description, image_url )`)
-        .eq('user_id', user.id)
-        .order('earned_at', { ascending: false })
-      const mapped = (data || []).map((ub: any) => ({ id: ub.id, earned_at: ub.earned_at, badge: ub.badges }))
-      setEarnedBadges(mapped)
-    }
-    fetchEarnedBadges()
-  }, [profile, user, isOrganization])
 
   const studentStats = [
     { label: "Total Points", value: profile?.eco_points || 0, info: '', max: pointsForNextLevel },
