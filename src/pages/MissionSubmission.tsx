@@ -105,9 +105,11 @@ export default function MissionSubmission() {
 
       // Upload video if provided
       if (videoFile) {
+        console.log('Uploading video file:', videoFile.name, 'Size:', videoFile.size)
         const fileExt = videoFile.name.split('.').pop()
         const fileName = `${user.id}/${Date.now()}.${fileExt}`
         
+        console.log('Upload path:', fileName)
         const { error: uploadError, data: uploadData } = await supabase.storage
           .from('mission-videos')
           .upload(fileName, videoFile, {
@@ -117,12 +119,14 @@ export default function MissionSubmission() {
 
         if (uploadError) {
           console.error('Error uploading video:', uploadError)
-          toast.error("Failed to upload video")
+          toast.error(`Failed to upload video: ${uploadError.message}`)
           setSubmitting(false)
           return
         }
 
+        console.log('Video uploaded successfully:', uploadData)
         videoUrl = uploadData.path
+        toast.success("Video uploaded successfully!")
       }
 
       const submissionData = {
